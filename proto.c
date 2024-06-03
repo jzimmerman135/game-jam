@@ -1,50 +1,14 @@
+#include <stdlib.h>
+#include <stdio.h>
+
 #include "raylib.h"
+
+#include "proto/state.h"
+#include "proto/lib/cJSON/cJSON.h"
 
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
 #endif
-
-//----------------------------------------------------------------------------------
-// Some Defines
-//----------------------------------------------------------------------------------
-#define MAX_TUBES 100
-#define FLOPPY_RADIUS 24
-#define TUBES_WIDTH 80
-
-//----------------------------------------------------------------------------------
-// Types and Structures Definition
-//----------------------------------------------------------------------------------
-typedef struct Floppy {
-    Vector2 position;
-    int radius;
-    Color color;
-} Floppy;
-
-typedef struct Tubes {
-    Rectangle rec;
-    Color color;
-    bool active;
-} Tubes;
-
-//------------------------------------------------------------------------------------
-// Global Variables Declaration
-//------------------------------------------------------------------------------------
-
-typedef struct {
-    int screenWidth;
-    int screenHeight;
-
-    bool gameOver;
-    bool pause;
-    int score;
-    int hiScore;
-
-    Floppy floppy;
-    Tubes tubes[MAX_TUBES*2];
-    Vector2 tubesPos[MAX_TUBES];
-    int tubesSpeedX;
-    bool superfx;
-} game_state;
 
 game_state G;
 
@@ -108,13 +72,8 @@ void init_game_state(game_state *gs)
     gs->superfx = false;
 }
 
-//------------------------------------------------------------------------------------
-// Program main entry point
-//------------------------------------------------------------------------------------
 int main(void)
 {
-    // Initialization
-    //---------------------------------------------------------
     init_game_state(&G);
     InitWindow(G.screenWidth, G.screenHeight, "worldshaper");
 
@@ -124,27 +83,65 @@ int main(void)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
 #else
     SetTargetFPS(60);
-    //--------------------------------------------------------------------------------------
 
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
-        // Update and Draw
-        //----------------------------------------------------------------------------------
         UpdateDrawFrame(&G);
-        //----------------------------------------------------------------------------------
     }
 #endif
-    // De-Initialization
-    //--------------------------------------------------------------------------------------
     UnloadGame(&G);
 
     CloseWindow();        // Close window and OpenGL context
-    //--------------------------------------------------------------------------------------
-
     return 0;
 }
 
+const int vals[] = {2, 2, 50, 100, 120};
+int valpos = 0;
+
+int GetValue(void)
+{
+    //return -GetRandomValue(0, 120);
+    return 2;
+}
+
+void load_map(game_state *gs)
+{
+    cJSON *json;
+    char *str;
+    FILE *fp;
+    size_t nbytes;
+    int i;
+
+    fp = fopen("proto/map.json", "r");
+
+    i = 0;
+
+    if (fp != NULL) {
+        const cJSON *rects, *rect;
+        fseek(fp, 0L, SEEK_END);
+        nbytes = ftell(fp);
+        str = malloc(nbytes + 1);
+        rewind(fp);
+        fread(str, 1, nbytes, fp);
+        str[nbytes] = 0;
+        fclose(fp);
+        json = cJSON_Parse(str);
+        printf("%s\n", str);
+
+        rects = cJSON_GetObjectItemCaseSensitive(json, "rects");
+
+        i = 0;
+        cJSON_ArrayForEach(rect, rects) {
+            gs->tubesPos[i].x = 400 + 280*i;
+            gs->tubesPos[i].y = -rect->valuedouble;
+            i++;
+        }
+
+        cJSON_Delete(json);
+        gs->nTubes = i;
+    }
+}
 
 // Initialize game variables
 void InitGame(game_state *gs)
@@ -156,10 +153,12 @@ void InitGame(game_state *gs)
     for (int i = 0; i < MAX_TUBES; i++)
     {
         gs->tubesPos[i].x = 400 + 280*i;
-        gs->tubesPos[i].y = -GetRandomValue(0, 120);
+        gs->tubesPos[i].y = 0;
     }
 
-    for (int i = 0; i < MAX_TUBES*2; i += 2)
+    load_map(gs);
+
+    for (int i = 0; i < gs->nTubes*2; i += 2)
     {
         gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
         gs->tubes[i].rec.y = gs->tubesPos[i/2].y;
@@ -192,7 +191,7 @@ void UpdateGame(game_state *gs)
         {
             for (int i = 0; i < MAX_TUBES; i++) gs->tubesPos[i].x -= gs->tubesSpeedX;
 
-            for (int i = 0; i < MAX_TUBES*2; i += 2)
+            for (int i = 0; i < gs->nTubes*2; i += 2)
             {
                 gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
                 gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
@@ -202,16 +201,16 @@ void UpdateGame(game_state *gs)
             else gs->floppy.position.y += 1;
 
             // Check Collisions
-            for (int i = 0; i < MAX_TUBES*2; i++)
+            for (int i = 0; i < gs->nTubes*2; i++)
             {
                 if (CheckCollisionCircleRec(gs->floppy.position, gs->floppy.radius, gs->tubes[i].rec)) {
-                    gs->gameOver = true;
-                    gs->pause = false;
+                    //gs->gameOver = true;
+                    //gs->pause = false;
                 } else if ((gs->tubesPos[i/2].x < gs->floppy.position.x) && gs->tubes[i/2].active && !gs->gameOver) {
                     gs->score += 100;
                     gs->tubes[i/2].active = false;
 
-                    gs->superfx = true;
+                    //gs->superfx = true;
 
                     if (gs->score > gs->hiScore) gs->hiScore = gs->score;
                 }
@@ -240,7 +239,7 @@ void DrawGame(game_state *gs)
             DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, DARKGRAY);
 
             // Draw tubes
-            for (int i = 0; i < MAX_TUBES; i++) {
+            for (int i = 0; i < gs->nTubes; i++) {
 
                 DrawRectangle(gs->tubes[i*2].rec.x,
                         gs->tubes[i*2].rec.y,

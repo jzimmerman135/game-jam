@@ -10,11 +10,21 @@ size_t open(void) {
 bool close(void);
 
 // creates the memory for the game state
-void init(game_state *state);
+void init(game_state *state)
+{
+
+}
 
 // returns false iff should close
-bool update(game_state *state);
-void render(const game_state *state);
+bool update(game_state *state)
+{
+    return true;
+}
+
+void render(const game_state *state)
+{
+
+}
 
 const game_api api = {
     .open = open,

@@ -5,9 +5,14 @@ CFLAGS := -Wall -Wpedantic -I/opt/homebrew/include
 LDFLAGS := -L/opt/homebrew/lib
 LIBS := -lraylib
 
+include proto.mk
+
 all: game.out
 
 game.out: main.o api.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+
+proto: $(PROTO_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 %.o: %.c

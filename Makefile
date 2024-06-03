@@ -12,7 +12,7 @@ all: game.out
 game.out: main.o api.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
-proto: $(PROTO_OBJ)
+proto.out: $(PROTO_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 %.o: %.c

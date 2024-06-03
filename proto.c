@@ -1,16 +1,3 @@
-/*******************************************************************************************
-*
-*   raylib - classic game: floppy
-*
-*   Sample game developed by Ian Eito, Albert Martos and Ramon Santamaria
-*
-*   This game has been created using raylib v1.3 (www.raylib.com)
-*   raylib is licensed under an unmodified zlib/libpng license (View raylib.h for details)
-*
-*   Copyright (c) 2015 Ramon Santamaria (@raysan5)
-*
-********************************************************************************************/
-
 #include "raylib.h"
 
 #if defined(PLATFORM_WEB)
@@ -42,28 +29,84 @@ typedef struct Tubes {
 //------------------------------------------------------------------------------------
 // Global Variables Declaration
 //------------------------------------------------------------------------------------
-static const int screenWidth = 800;
-static const int screenHeight = 450;
 
-static bool gameOver = false;
-static bool pause = false;
-static int score = 0;
-static int hiScore = 0;
+typedef struct {
+    int screenWidth;
+    int screenHeight;
 
-static Floppy floppy = { 0 };
-static Tubes tubes[MAX_TUBES*2] = { 0 };
-static Vector2 tubesPos[MAX_TUBES] = { 0 };
-static int tubesSpeedX = 0;
-static bool superfx = false;
+    bool gameOver;
+    bool pause;
+    int score;
+    int hiScore;
+
+    Floppy floppy;
+    Tubes tubes[MAX_TUBES*2];
+    Vector2 tubesPos[MAX_TUBES];
+    int tubesSpeedX;
+    bool superfx;
+} game_state;
+
+game_state G;
 
 //------------------------------------------------------------------------------------
 // Module Functions Declaration (local)
 //------------------------------------------------------------------------------------
-static void InitGame(void);         // Initialize game
-static void UpdateGame(void);       // Update game (one frame)
-static void DrawGame(void);         // Draw game (one frame)
-static void UnloadGame(void);       // Unload game
-static void UpdateDrawFrame(void);  // Update and Draw (one frame)
+static void InitGame(game_state *);         // Initialize game
+static void UpdateGame(game_state *);       // Update game (one frame)
+static void DrawGame(game_state *);         // Draw game (one frame)
+static void UnloadGame(game_state *);       // Unload game
+static void UpdateDrawFrame(game_state *);  // Update and Draw (one frame)
+
+void floppy_init(Floppy *flop)
+{
+    //Vector2 position;
+    flop->radius = 0;
+    flop->color.r = 0;
+    flop->color.g = 0;
+    flop->color.b = 0;
+    flop->color.a = 255;
+}
+
+void tubes_init(Tubes *tb)
+{
+    tb->rec.x = 0;
+    tb->rec.y = 0;
+    tb->rec.width = 0;
+    tb->rec.height = 0;
+
+    tb->color.r = 0;
+    tb->color.g = 0;
+    tb->color.b = 0;
+    tb->color.a = 255;
+
+    tb->active = false;
+}
+
+void init_game_state(game_state *gs)
+{
+    int i;
+    gs->screenWidth = 800;
+    gs->screenHeight = 450;
+
+    gs->gameOver = false;
+    gs->pause = false;
+    gs->score = 0;
+    gs->hiScore = 0;
+
+    floppy_init(&gs->floppy);
+
+    for (i = 0; i < MAX_TUBES; i++) {
+        gs->tubesPos[i].x = 0;
+        gs->tubesPos[i].y = 0;
+    }
+
+    for (i = 0; i < MAX_TUBES*2; i++) {
+        tubes_init(&gs->tubes[i]);
+    }
+
+    gs->tubesSpeedX = 0;
+    gs->superfx = false;
+}
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -72,9 +115,10 @@ int main(void)
 {
     // Initialization
     //---------------------------------------------------------
-    InitWindow(screenWidth, screenHeight, "classic game: floppy");
+    init_game_state(&G);
+    InitWindow(G.screenWidth, G.screenHeight, "worldshaper");
 
-    InitGame();
+    InitGame(&G);
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
@@ -87,94 +131,89 @@ int main(void)
     {
         // Update and Draw
         //----------------------------------------------------------------------------------
-        UpdateDrawFrame();
+        UpdateDrawFrame(&G);
         //----------------------------------------------------------------------------------
     }
 #endif
     // De-Initialization
     //--------------------------------------------------------------------------------------
-    UnloadGame();         // Unload loaded data (textures, sounds, models...)
+    UnloadGame(&G);
 
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 
     return 0;
 }
-//------------------------------------------------------------------------------------
-// Module Functions Definitions (local)
-//------------------------------------------------------------------------------------
+
 
 // Initialize game variables
-void InitGame(void)
+void InitGame(game_state *gs)
 {
-    floppy.radius = FLOPPY_RADIUS;
-    floppy.position = (Vector2){80, screenHeight/2 - floppy.radius};
-    tubesSpeedX = 2;
+    gs->floppy.radius = FLOPPY_RADIUS;
+    gs->floppy.position = (Vector2){80, gs->screenHeight/2 - gs->floppy.radius};
+    gs->tubesSpeedX = 2;
 
     for (int i = 0; i < MAX_TUBES; i++)
     {
-        tubesPos[i].x = 400 + 280*i;
-        tubesPos[i].y = -GetRandomValue(0, 120);
+        gs->tubesPos[i].x = 400 + 280*i;
+        gs->tubesPos[i].y = -GetRandomValue(0, 120);
     }
 
     for (int i = 0; i < MAX_TUBES*2; i += 2)
     {
-        tubes[i].rec.x = tubesPos[i/2].x;
-        tubes[i].rec.y = tubesPos[i/2].y;
-        tubes[i].rec.width = TUBES_WIDTH;
-        tubes[i].rec.height = 255;
+        gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
+        gs->tubes[i].rec.y = gs->tubesPos[i/2].y;
+        gs->tubes[i].rec.width = TUBES_WIDTH;
+        gs->tubes[i].rec.height = 255;
 
-        tubes[i+1].rec.x = tubesPos[i/2].x;
-        tubes[i+1].rec.y = 600 + tubesPos[i/2].y - 255;
-        tubes[i+1].rec.width = TUBES_WIDTH;
-        tubes[i+1].rec.height = 255;
+        gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
+        gs->tubes[i+1].rec.y = 600 + gs->tubesPos[i/2].y - 255;
+        gs->tubes[i+1].rec.width = TUBES_WIDTH;
+        gs->tubes[i+1].rec.height = 255;
 
-        tubes[i/2].active = true;
+        gs->tubes[i/2].active = true;
     }
 
-    score = 0;
+    gs->score = 0;
 
-    gameOver = false;
-    superfx = false;
-    pause = false;
+    gs->gameOver = false;
+    gs->superfx = false;
+    gs->pause = false;
 }
 
 // Update game (one frame)
-void UpdateGame(void)
+void UpdateGame(game_state *gs)
 {
-    if (!gameOver)
+    if (!gs->gameOver)
     {
-        if (IsKeyPressed('P')) pause = !pause;
+        if (IsKeyPressed('P')) gs->pause = !gs->pause;
 
-        if (!pause)
+        if (!gs->pause)
         {
-            for (int i = 0; i < MAX_TUBES; i++) tubesPos[i].x -= tubesSpeedX;
+            for (int i = 0; i < MAX_TUBES; i++) gs->tubesPos[i].x -= gs->tubesSpeedX;
 
             for (int i = 0; i < MAX_TUBES*2; i += 2)
             {
-                tubes[i].rec.x = tubesPos[i/2].x;
-                tubes[i+1].rec.x = tubesPos[i/2].x;
+                gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
+                gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
             }
 
-            if (IsKeyDown(KEY_SPACE) && !gameOver) floppy.position.y -= 3;
-            else floppy.position.y += 1;
+            if (IsKeyDown(KEY_SPACE) && !gs->gameOver) gs->floppy.position.y -= 3;
+            else gs->floppy.position.y += 1;
 
             // Check Collisions
             for (int i = 0; i < MAX_TUBES*2; i++)
             {
-                if (CheckCollisionCircleRec(floppy.position, floppy.radius, tubes[i].rec))
-                {
-                    gameOver = true;
-                    pause = false;
-                }
-                else if ((tubesPos[i/2].x < floppy.position.x) && tubes[i/2].active && !gameOver)
-                {
-                    score += 100;
-                    tubes[i/2].active = false;
+                if (CheckCollisionCircleRec(gs->floppy.position, gs->floppy.radius, gs->tubes[i].rec)) {
+                    gs->gameOver = true;
+                    gs->pause = false;
+                } else if ((gs->tubesPos[i/2].x < gs->floppy.position.x) && gs->tubes[i/2].active && !gs->gameOver) {
+                    gs->score += 100;
+                    gs->tubes[i/2].active = false;
 
-                    superfx = true;
+                    gs->superfx = true;
 
-                    if (score > hiScore) hiScore = score;
+                    if (gs->score > gs->hiScore) gs->hiScore = gs->score;
                 }
             }
         }
@@ -183,41 +222,46 @@ void UpdateGame(void)
     {
         if (IsKeyPressed(KEY_ENTER))
         {
-            InitGame();
-            gameOver = false;
+            InitGame(&G);
+            gs->gameOver = false;
         }
     }
 }
 
 // Draw game (one frame)
-void DrawGame(void)
+void DrawGame(game_state *gs)
 {
     BeginDrawing();
 
         ClearBackground(RAYWHITE);
 
-        if (!gameOver)
+        if (!gs->gameOver)
         {
-            DrawCircle(floppy.position.x, floppy.position.y, floppy.radius, DARKGRAY);
+            DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, DARKGRAY);
 
             // Draw tubes
-            for (int i = 0; i < MAX_TUBES; i++)
-            {
-                DrawRectangle(tubes[i*2].rec.x, tubes[i*2].rec.y, tubes[i*2].rec.width, tubes[i*2].rec.height, GRAY);
-                DrawRectangle(tubes[i*2 + 1].rec.x, tubes[i*2 + 1].rec.y, tubes[i*2 + 1].rec.width, tubes[i*2 + 1].rec.height, GRAY);
+            for (int i = 0; i < MAX_TUBES; i++) {
+
+                DrawRectangle(gs->tubes[i*2].rec.x,
+                        gs->tubes[i*2].rec.y,
+                        gs->tubes[i*2].rec.width,
+                        gs->tubes[i*2].rec.height, GRAY);
+                DrawRectangle(gs->tubes[i*2 + 1].rec.x,
+                        gs->tubes[i*2 + 1].rec.y,
+                        gs->tubes[i*2 + 1].rec.width,
+                        gs->tubes[i*2 + 1].rec.height, GRAY);
             }
 
             // Draw flashing fx (one frame only)
-            if (superfx)
-            {
-                DrawRectangle(0, 0, screenWidth, screenHeight, WHITE);
-                superfx = false;
+            if (gs->superfx) {
+                DrawRectangle(0, 0, gs->screenWidth, gs->screenHeight, WHITE);
+                gs->superfx = false;
             }
 
-            DrawText(TextFormat("%04i", score), 20, 20, 40, GRAY);
-            DrawText(TextFormat("HI-SCORE: %04i", hiScore), 20, 70, 20, LIGHTGRAY);
+            DrawText(TextFormat("%04i", gs->score), 20, 20, 40, GRAY);
+            DrawText(TextFormat("HI-SCORE: %04i", gs->hiScore), 20, 70, 20, LIGHTGRAY);
 
-            if (pause) DrawText("GAME PAUSED", screenWidth/2 - MeasureText("GAME PAUSED", 40)/2, screenHeight/2 - 40, 40, GRAY);
+            if (gs->pause) DrawText("GAME PAUSED", gs->screenWidth/2 - MeasureText("GAME PAUSED", 40)/2, gs->screenHeight/2 - 40, 40, GRAY);
         }
         else DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2, GetScreenHeight()/2 - 50, 20, GRAY);
 
@@ -225,14 +269,14 @@ void DrawGame(void)
 }
 
 // Unload game variables
-void UnloadGame(void)
+void UnloadGame(game_state *gs)
 {
     // TODO: Unload all dynamic loaded data (textures, sounds, models...)
 }
 
 // Update and Draw (one frame)
-void UpdateDrawFrame(void)
+void UpdateDrawFrame(game_state *gs)
 {
-    UpdateGame();
-    DrawGame();
+    UpdateGame(gs);
+    DrawGame(gs);
 }

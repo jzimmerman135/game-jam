@@ -1,4 +1,4 @@
-PROTO_OBJ=proto.o
+PROTO_OBJ=proto.o proto/main.o
 
 proto_clean:
-	$(RM) proto $(PROTO_OBJ)
+	$(RM) proto.out $(PROTO_OBJ)

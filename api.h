@@ -24,6 +24,9 @@ struct game_state {
     Floppy floppy;
     Map map;
 
+    float delta;
+    float elapsed;
+
     bool superfx;
 };
 

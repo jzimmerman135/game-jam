@@ -20,7 +20,7 @@ void close(void)
 void init(game_state *gs)
 {
     gs->screenWidth = 800;
-    gs->screenHeight = 450;
+    gs->screenHeight = 600;
 
     gs->gameOver = false;
     gs->pause = false;

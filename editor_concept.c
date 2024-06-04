@@ -118,7 +118,7 @@ bool step(game_state *state) {
     return true;
 }
 
-int get_api_version_id(const game_state *state)
+int requested_api_version_id(const game_state *state)
 {
     return state->api_version_id;
 }
@@ -134,6 +134,6 @@ const game_api shared_obj_api = {
     .close = closegame,
     .init = init,
     .step = step,
-    .requested_api_version_id = get_api_version_id,
+    .requested_api_version_id = requested_api_version_id,
     .set_api_version_id_callback = set_api_version_id,
 };

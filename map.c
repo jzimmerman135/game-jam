@@ -24,10 +24,12 @@ static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     tb->rec.y = ypos->valuedouble;
     tb->rec.width = width->valuedouble;
     tb->rec.height = height->valuedouble;
+    // printf("RECT %f %f %f %f\n", tb->rec.x, tb->rec.y, tb->rec.width, tb->rec.height);
+    tb->color = (Color){0, 0, 0, 255};
     *xpos += xoff;
 }
 
-static void _load_map(game_state *gs)
+void init_map(Map *m)
 {
     cJSON *json;
     char *str;
@@ -69,19 +71,18 @@ static void _load_map(game_state *gs)
         i = 0;
         xpos = 0;
         cJSON_ArrayForEach(rect, rects) {
-            //gs->tubesPos[i].x = 400 + 280*i;
-            //gs->tubesPos[i].y = -rect->valuedouble;
-            load_tube(rect, &gs->tubes[i], &xpos);
+            load_tube(rect, &(m->tubes[i]), &xpos);
             i++;
         }
 
         cJSON_Delete(json);
-        gs->nTubes = i;
+        m->nTubes = i;
     }
 }
 
-void load_map(game_state *gs, char *filename)
-{
-    // TODO: take in filename
-    _load_map(gs);
+void draw_map(Map *map) {
+    (void)map;
+    for (int i = 0; i < map->nTubes; i++) {
+        DrawRectangle(map->tubes[i].rec.x, map->tubes[i].rec.y, map->tubes[i].rec.width, map->tubes[i].rec.height, map->tubes[i].color);
+    }
 }

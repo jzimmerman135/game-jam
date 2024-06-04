@@ -81,7 +81,7 @@ map = {
 }
 
 t = upper_tube(screen_height_50 * 0.8)
-t.leftpad = screen_width;
+t.leftpad = screen_width * 0.5;
 add_rect(map, t)
 t = lower_tube(screen_height_50)
 add_rect(map, t)

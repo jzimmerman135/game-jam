@@ -104,6 +104,7 @@ int main(void) {
     api->open();
     void *game_state = malloc(api->game_state_size);
     assert(game_state);
+    memset(game_state, 0, api->game_state_size);
     api->init(game_state);
 
     do {
@@ -114,6 +115,7 @@ int main(void) {
             api->set_api_version_id_callback(game_state, api_manager.curr_version_id);
             if (old_game_state_size != api->game_state_size) {
                 game_state = realloc(game_state, api->game_state_size);
+                memset(game_state, 0, api->game_state_size);
                 assert(game_state);
                 api->init(game_state);
             }

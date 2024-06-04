@@ -4,12 +4,28 @@
 #include "stdbool.h"
 #include <stdlib.h>
 #include "raylib.h"
+#include "types.h"
 
 #define GAME_STATE_SIZE 20
-#define MAX_TUBES 100
 #define LOAD_NEW_API (-1)
 
 typedef struct game_state game_state;
+
+struct game_state {
+    int screenWidth;
+    int screenHeight;
+
+    int score;
+    int hiScore;
+
+    Settings settings;
+    Vector2 screen;
+    Camera2D camera;
+    Floppy floppy;
+    Map map;
+
+    bool superfx;
+};
 
 typedef struct {
   // returns int for size of game_state
@@ -28,38 +44,6 @@ typedef struct {
   const size_t game_state_size;
 } game_api;
 
-typedef struct Floppy {
-    Vector2 position;
-    int radius;
-    Color color;
-} Floppy;
-
-typedef struct Tubes {
-    Rectangle rec;
-    Color color;
-    bool active;
-} Tubes;
-
-struct game_state {
-    int screenWidth;
-    int screenHeight;
-
-    bool gameOver;
-    bool pause;
-    int score;
-    int hiScore;
-
-    Floppy floppy;
-    Tubes tubes[MAX_TUBES*2];
-    Vector2 tubesPos[MAX_TUBES];
-    int tubesSpeedX;
-    bool superfx;
-    int nTubes;
-    float xOffset;
-};
-
 extern const game_api shared_obj_api;
-
-void set_nTubes(game_state *gs, int nTubes);
 
 #endif

@@ -1,7 +1,10 @@
 #ifndef MAP_H
 #define MAP_H
-#include "api.h"
 
-void load_map(game_state *gs, char *filename);
+#include "raylib.h"
+#include "types.h"
+
+void init_map(Map *map);
+void draw_map(Map *map);
 
 #endif

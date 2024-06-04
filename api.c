@@ -94,8 +94,6 @@ void UpdateGame(game_state *gs)
     if (settings->pause)
         return;
 
-    // update x offset of rectangles
-
     float gravity = 7.0;
     gs->floppy.velocity.y += gravity;
 
@@ -133,15 +131,15 @@ void DrawGame(game_state *gs)
     if (gs->settings.gameOver)
     {
         DrawText("PRESS [ENTER] TO PLAY AGAIN",
-                GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2,
-                GetScreenHeight()/2 - 50, 20, GRAY);
+            gs->screen.x / 2.0 - (float)MeasureText("PRESS [ENTER] TO PLAY AGAIN", 40)/2,
+            gs->screen.y / 2.0 - 40, 40, RED);
         return;
     }
 
     if (gs->settings.pause) {
         DrawText("GAME PAUSED",
-                gs->screenWidth/2 - MeasureText("GAME PAUSED", 40)/2,
-                gs->screenHeight/2 - 40, 40, GRAY);
+                gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
+                gs->screen.y / 2.0 - 40, 40, RED);
         return;
     }
 

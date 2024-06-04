@@ -125,8 +125,16 @@ void load_map(game_state *gs)
     FILE *fp;
     size_t nbytes;
     int i;
+    const char *mapFilePath;
 
-    fp = fopen("proto/map.json", "r");
+    mapFilePath = "proto/maps/01.json";
+    fp = fopen(mapFilePath, "r");
+
+    if (fp == NULL) {
+        fprintf(stderr, "Could not map: %s\n", mapFilePath);
+        fprintf(stderr, "Has it been generated yet?\n");
+        exit(1);
+    }
 
     i = 0;
 

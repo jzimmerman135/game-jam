@@ -9,13 +9,22 @@ tube_width = 100
 square_size = 64
 square_ycenter = screen_height_50 - square_size*0.5
 
+types = {
+    death = 0,
+    surface = 1,
+    toggle = 2,
+    red = 3,
+    blue = 3,
+}
+
 function rect(p)
     return {
         ypos = p.ypos or 0,
         width = p.width or tube_width,
         height = p.height or screen_height_25,
         move = p.move or tube_width * 3,
-        leftpad = p.leftpad or 0
+        leftpad = p.leftpad or 0,
+        type = types.death,
     }
 end
 

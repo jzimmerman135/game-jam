@@ -7,7 +7,6 @@
 #include "types.h"
 
 #define GAME_STATE_SIZE 20
-#define LOAD_NEW_API (-1)
 
 typedef struct game_state game_state;
 

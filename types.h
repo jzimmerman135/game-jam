@@ -6,6 +6,8 @@
 #define MAX_TUBES 100
 #define MAX_POWERUPS 32
 
+#define LOAD_NEW_API (-1)
+
 typedef struct {
     bool gameOver;
     bool pause;
@@ -32,13 +34,15 @@ typedef struct {
 } Map;
 
 typedef struct {
+    Vector2 position;
+    Color color;
+    bool active;
+    int api_version_id;
+} Powerup;
+
+typedef struct {
     int nPowerups;
-    struct {
-        Vector2 position;
-        Color color;
-        bool active;
-        int api_version;
-    } powerups[MAX_POWERUPS];
+     Powerup powerups[MAX_POWERUPS];
 } Powerups;
 
 #endif

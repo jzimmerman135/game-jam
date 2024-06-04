@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "editor_concept_user_code.h"
+#include <unistd.h>
 
 struct game_state
 {
@@ -12,13 +13,18 @@ struct game_state
     bool is_editing;
 };
 
-void open(void)
+void opengame(void)
 {
+    if (getenv("EDITOR") == NULL) {
+        perror("cannot play game without EDITOR environment variable set\n");
+        exit(1);
+    }
+
     InitWindow(800, 600, "title");
     SetTargetFPS(30);
 }
 
-void close(void)
+void closegame(void)
 {
     CloseWindow();
 }
@@ -34,6 +40,15 @@ void init(game_state *state)
 bool try_open_editor(void)
 {
     printf("trying to open editor\n");
+
+    int pid = fork();
+    if (pid == 0) {
+        execlp(getenv("EDITOR"), getenv("EDITOR"), "editor_concept_user_code.c", NULL);
+        perror("execlp");
+        exit(1);
+    }
+
+    // FILE *fp = popen("$EDITOR editor_concept_user_code.c", "r");
     return true;
 }
 
@@ -115,8 +130,8 @@ void set_api_version_id(game_state *state, int version_id)
 
 const game_api shared_obj_api = {
     .game_state_size = sizeof(game_state),
-    .open = open,
-    .close = close,
+    .open = opengame,
+    .close = closegame,
     .init = init,
     .step = step,
     .requested_api_version_id = get_api_version_id,

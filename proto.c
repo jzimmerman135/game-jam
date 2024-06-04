@@ -104,7 +104,7 @@ void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     move = cJSON_GetObjectItemCaseSensitive(data, "move");
     ypos = cJSON_GetObjectItemCaseSensitive(data, "ypos");
     leftpad = cJSON_GetObjectItemCaseSensitive(data, "leftpad");
-  
+
     xoff = 0;
     xoff = move->valuedouble;
     tb->rec.x = *xpos;
@@ -316,7 +316,7 @@ void DrawGame(game_state *gs)
 
 void UnloadGame(game_state *gs)
 {
-    
+
 }
 
 // Update and Draw (one frame)

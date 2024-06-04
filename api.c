@@ -20,25 +20,12 @@ void init(game_state *state)
 {
 }
 
-// returns false iff should close
-bool update(game_state *state)
-{
+bool step(game_state *state) {
     BeginDrawing();
     if (IsKeyPressed(KEY_ESCAPE))
         return false;
 
-    return true;
-}
-
-void render(const game_state *state)
-{
     EndDrawing();
-}
-
-bool step(game_state *state) {
-    if (!update(state))
-        return false;
-    render(state);
     return true;
 }
 

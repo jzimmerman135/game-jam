@@ -9,7 +9,7 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 
-#define MADEIT() fprintf(stderr, "%s::%d made it\n", __FILE__, __LINE__)
+#define MADEIT() perror(stderr, "%s::%d made it\n", __FILE__, __LINE__)
 
 // this name must be used in makefile
 const char TMP_API_PATH[] = ".game_api_VXXXXXX";

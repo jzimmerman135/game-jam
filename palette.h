@@ -8,6 +8,8 @@ enum {
     COLOR_TUBE_DEATH,
     COLOR_TUBE_PLATFORM,
     COLOR_TUBE_TOGGLE,
+    COLOR_TUBE_BLUE,
+    COLOR_TUBE_RED,
 };
 
 Color get_color(int clr);

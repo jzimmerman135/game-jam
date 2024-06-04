@@ -130,6 +130,20 @@ static void draw_tube(Tubes *tb)
                 get_color(COLOR_TUBE_TOGGLE)
                 );
             break;
+        case TUBE_BLUE:
+            DrawRectangle(tb->rec.x + 8,
+                tb->rec.y + 8,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_SHADOW)
+                );
+            DrawRectangle(tb->rec.x,
+                tb->rec.y,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_BLUE)
+                );
+            break;
         default:
             DrawRectangle(tb->rec.x + 8,
                 tb->rec.y + 8,

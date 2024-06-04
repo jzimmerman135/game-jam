@@ -74,6 +74,36 @@ void init(game_state *gs)
     };
 }
 
+static int how_did_it_collide(game_state *gs, Tubes *tb) {
+    // TODO: implement
+
+    return 0;
+}
+
+void handle_tube_collision(game_state *gs, Tubes *tb)
+{
+    switch (tb->type) {
+        case TUBE_PLATFORM: {
+            int direction = how_did_it_collide(gs, tb);
+
+            if (direction == 0) {
+                /* upper: snap to right above */
+                gs->floppy.position.y =
+                    tb->rec.y -
+                    gs->floppy.radius*1.1;
+            }
+        }
+            break;
+        case TUBE_DEATH:
+        default: {
+            Settings *settings = &gs->settings;
+            settings->gameOver = true;
+            settings->pause = false;
+            break;
+        }
+    }
+}
+
 void UpdateGame(game_state *gs)
 {
     gs->delta = GetFrameTime();
@@ -97,8 +127,8 @@ void UpdateGame(game_state *gs)
 
     // update x offset of rectangles
 
-    float gravity = 7.0;
-    gs->floppy.velocity.y += gravity;
+    float gravity = 400.0;
+    gs->floppy.velocity.y += gravity*gs->delta;
 
     gs->floppy.position = (Vector2){
         gs->floppy.position.x + gs->floppy.velocity.x * gs->delta,
@@ -107,7 +137,8 @@ void UpdateGame(game_state *gs)
 
     if (IsKeyPressed(KEY_SPACE)) {
         // TODO: CONFIGURE NICE JUMP KINEMATICS
-        gs->floppy.velocity.y = max(gs->floppy.velocity.y - 400., -300);
+        //gs->floppy.velocity.y = max(gs->floppy.velocity.y - 400., -300);
+        gs->floppy.velocity.y = max(gs->floppy.velocity.y - 1000., -300);
     }
 
     gs->camera.target.x = gs->floppy.position.x;
@@ -119,9 +150,10 @@ void UpdateGame(game_state *gs)
         bool collided = CheckCollisionCircleRec(
             gs->floppy.position, gs->floppy.radius, tube->rec);
         if (collided) {
-            settings->gameOver = true;
-            settings->pause = false;
-            break;
+            // settings->gameOver = true;
+            // settings->pause = false;
+            // break;
+            handle_tube_collision(gs, tube);
         }
     }
 }

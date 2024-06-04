@@ -93,24 +93,27 @@ t = upper_tube(screen_height_50 * 0.8)
 t.leftpad = screen_width * 0.5;
 add_rect(map, t)
 t = lower_tube(screen_height_50)
+t.move = tube_width*1.3;
 add_rect(map, t)
 
-t = platform(from_bottom(0.75), tube_width*3)
-t.move = tube_width*3
-add_rect(map, t)
-
-t = platform(from_bottom(0.5), tube_width*3)
-t.move = tube_width*3
+t = platform(from_bottom(0.5), tube_width*4)
+t.move = tube_width*4
 add_rect(map, t)
 
 t = platform(from_bottom(0.25), tube_width*3)
+t.move = tube_width*3
+add_rect(map, t)
+
+t = platform(from_bottom(0.1), tube_width*3)
 t.move = tube_width*3.5
 add_rect(map, t)
 
 t = toggle(from_bottom(0.3))
+t.move = tube_width*2
 add_rect(map, t)
 
 t = barrier()
+t.types = rect_types.blue
 add_rect(map, t)
 
 fp = io.open("proto/maps/01.json", "w")

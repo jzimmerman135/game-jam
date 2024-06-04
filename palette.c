@@ -20,6 +20,10 @@ const Color palette[] = {
     CLITERAL(Color){0xff, 0xb3, 0xba, 0xFF},
     /* COLOR_TUBE_TOGGLE */
     CLITERAL(Color){0xBA, 0xFF, 0xC9, 0xFF},
+    /* COLOR_TUBE_BLUE */
+    CLITERAL(Color){0xBA, 0xE1, 0xFF, 0xFF},
+    /* COLOR_TUBE_RED */
+    CLITERAL(Color){0xDB, 0xDC, 0xFF, 0xFF},
 };
 
 Color get_color(int clr) {

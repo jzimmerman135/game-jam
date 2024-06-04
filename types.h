@@ -26,6 +26,7 @@ typedef struct Tubes {
     Rectangle rec;
     Color color;
     bool active;
+    int type;
 } Tubes;
 
 typedef struct {

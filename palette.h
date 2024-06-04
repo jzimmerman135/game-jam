@@ -1,0 +1,10 @@
+enum {
+    COLOR_BACKGROUND,
+    COLOR_AVATAR,
+    COLOR_AVATAR_BORDER1,
+    COLOR_AVATAR_BORDER2,
+    COLOR_TUBE_DEFAULT,
+    COLOR_TUBE_SHADOW,
+};
+
+Color get_color(int clr);

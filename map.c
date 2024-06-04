@@ -1,11 +1,13 @@
 #include <stdio.h>
+#include <math.h>
 #include "map.h"
 #include "api.h"
 #include "lib/cJSON/cJSON.h"
+#include "palette.h"
 
 static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
 {
-    const cJSON *width, *height, *move, *ypos, *leftpad;
+    const cJSON *width, *height, *move, *ypos, *leftpad, *type;
     float xoff;
 
     width = cJSON_GetObjectItemCaseSensitive(data, "width");
@@ -13,19 +15,22 @@ static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     move = cJSON_GetObjectItemCaseSensitive(data, "move");
     ypos = cJSON_GetObjectItemCaseSensitive(data, "ypos");
     leftpad = cJSON_GetObjectItemCaseSensitive(data, "leftpad");
+    type = cJSON_GetObjectItemCaseSensitive(data, "type");
 
     xoff = 0;
     xoff = move->valuedouble;
     tb->rec.x = *xpos;
+
     if (leftpad != NULL) {
         tb->rec.x += leftpad->valuedouble;
         xoff += leftpad->valuedouble;
     }
+
     tb->rec.y = ypos->valuedouble;
     tb->rec.width = width->valuedouble;
     tb->rec.height = height->valuedouble;
-    // printf("RECT %f %f %f %f\n", tb->rec.x, tb->rec.y, tb->rec.width, tb->rec.height);
     tb->color = (Color){0, 0, 0, 255};
+    tb->type = floor(type->valuedouble);
     *xpos += xoff;
 }
 
@@ -83,6 +88,17 @@ void init_map(Map *m)
 void draw_map(Map *map) {
     (void)map;
     for (int i = 0; i < map->nTubes; i++) {
-        DrawRectangle(map->tubes[i].rec.x, map->tubes[i].rec.y, map->tubes[i].rec.width, map->tubes[i].rec.height, map->tubes[i].color);
+        DrawRectangle(map->tubes[i].rec.x + 8,
+            map->tubes[i].rec.y + 8,
+            map->tubes[i].rec.width,
+            map->tubes[i].rec.height,
+            get_color(COLOR_TUBE_SHADOW)
+            );
+        DrawRectangle(map->tubes[i].rec.x,
+            map->tubes[i].rec.y,
+            map->tubes[i].rec.width,
+            map->tubes[i].rec.height,
+            get_color(COLOR_TUBE_DEFAULT)
+            );
     }
 }

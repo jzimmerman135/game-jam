@@ -3,9 +3,6 @@
 
 #include "raylib.h"
 
-#include "proto/state.h"
-#include "proto/lib/cJSON/cJSON.h"
-
 #if defined(PLATFORM_WEB)
     #include <emscripten/emscripten.h>
 #endif
@@ -94,97 +91,19 @@ int main(void)
 const int vals[] = {2, 2, 50, 100, 120};
 int valpos = 0;
 
-void load_tube(const cJSON *data, Tubes *tb, float *xpos)
-{
-    const cJSON *width, *height, *move, *ypos, *leftpad;
-    float xoff;
-
-    width = cJSON_GetObjectItemCaseSensitive(data, "width");
-    height = cJSON_GetObjectItemCaseSensitive(data, "height");
-    move = cJSON_GetObjectItemCaseSensitive(data, "move");
-    ypos = cJSON_GetObjectItemCaseSensitive(data, "ypos");
-    leftpad = cJSON_GetObjectItemCaseSensitive(data, "leftpad");
-
-    xoff = 0;
-    xoff = move->valuedouble;
-    tb->rec.x = *xpos;
-    if (leftpad != NULL) {
-        tb->rec.x += leftpad->valuedouble;
-        xoff += leftpad->valuedouble;
-    }
-    tb->rec.y = ypos->valuedouble;
-    tb->rec.width = width->valuedouble;
-    tb->rec.height = height->valuedouble;
-    *xpos += xoff;
-}
-
-void load_map(game_state *gs)
-{
-    cJSON *json;
-    char *str;
-    FILE *fp;
-    size_t nbytes;
-    int i;
-    const char *mapFilePath;
-
-    mapFilePath = "proto/maps/01.json";
-    fp = fopen(mapFilePath, "r");
-
-    if (fp == NULL) {
-        fprintf(stderr, "Could not map: %s\n", mapFilePath);
-        fprintf(stderr, "Has it been generated yet?\n");
-        exit(1);
-    }
-
-    i = 0;
-
-    if (fp != NULL) {
-        const cJSON *rects, *rect;
-        float xpos;
-
-        fseek(fp, 0L, SEEK_END);
-        nbytes = ftell(fp);
-        str = malloc(nbytes + 1);
-        rewind(fp);
-        fread(str, 1, nbytes, fp);
-        str[nbytes] = 0;
-        fclose(fp);
-        json = cJSON_Parse(str);
-        if (json == NULL) {
-            fprintf(stderr, "!!!!invalid map data!!!!");
-        }
-        free(str);
-
-        rects = cJSON_GetObjectItemCaseSensitive(json, "rects");
-
-        i = 0;
-        xpos = 0;
-        cJSON_ArrayForEach(rect, rects) {
-            //gs->tubesPos[i].x = 400 + 280*i;
-            //gs->tubesPos[i].y = -rect->valuedouble;
-            load_tube(rect, &gs->tubes[i], &xpos);
-            i++;
-        }
-
-        cJSON_Delete(json);
-        gs->nTubes = i;
-    }
-}
-
 // Initialize game variables
 void InitGame(game_state *gs)
 {
     gs->floppy.radius = FLOPPY_RADIUS;
-    gs->floppy.position = (Vector2){80, gs->screenHeight/2 - gs->floppy.radius};
+    gs->floppy.position = (Vector2){80, gs->screenHeight / 2.0 - gs->floppy.radius};
     gs->tubesSpeedX = 2;
 
-    for (int i = 0; i < MAX_TUBES; i++)
-    {
+    for (int i = 0; i < MAX_TUBES; i++) {
         gs->tubesPos[i].x = 0;
         gs->tubesPos[i].y = 0;
     }
 
-    load_map(gs);
+    //load_map(gs);
 
     // for (int i = 0; i < gs->nTubes*2; i += 2)
     // {
@@ -212,11 +131,8 @@ void InitGame(game_state *gs)
 static Rectangle rectWithOffset(game_state *gs, Rectangle *r)
 {
     Rectangle r_off;
-
     r_off = *r;
-
     r_off.x -= gs->xOffset;
-
     return r_off;
 }
 
@@ -269,10 +185,6 @@ void UpdateGame(game_state *gs)
     }
 }
 
-static void DrawRectWithOffset(game_state *gs, Rectangle *r, Color clr)
-{
-    DrawRectangle(r->x - gs->xOffset, r->y, r->width, r->height, clr);
-}
 
 // Draw game (one frame)
 void DrawGame(game_state *gs)

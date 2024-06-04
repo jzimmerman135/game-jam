@@ -32,6 +32,6 @@ typedef struct {
     int tubesSpeedX;
     bool superfx;
     int nTubes;
-    float xOffset; 
+    float xOffset;
 } game_state;
 #endif

@@ -99,6 +99,8 @@ int main(void) {
 
     const game_api *api = use_api(&api_manager, LOAD_NEW_API);
 
+    printf("game state size %ld\n", api->game_state_size);
+
     api->open();
     void *game_state = malloc(api->game_state_size);
     assert(game_state);

@@ -1,4 +1,4 @@
-PROTO_OBJ=proto.o proto/lib/cJSON/cJSON.o
+PROTO_OBJ=proto.o proto/lib/cJSON/cJSON.o map.o
 CFLAGS+=-g
 
 proto_clean:

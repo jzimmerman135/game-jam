@@ -5,11 +5,13 @@ CFLAGS := -Wall -Wpedantic -g -I/opt/homebrew/include -fsanitize=address
 LDFLAGS := -L/opt/homebrew/lib
 LIBS := -lraylib
 
-all: game.out editortest.out gameproto
+OBJS = api.o map.o lib/cJSON/cJSON.o
+
+all: game.out editortest.out game_api.dylib
 
 include proto.mk
 
-game.out: main.o api.o
+game.out: main.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 gameproto.out: $(PROTO_OBJ)
@@ -21,7 +23,7 @@ editortest.out: main.o game_api.dylib
 %.o: %.c
 	$(CC) $(CFLAGS) -fPIC -c $< -o $@
 
-game_api.dylib: editor_concept.o editor_concept_user_code.o
+game_api.dylib: $(OBJS)
 	$(CC) $(CFLAGS) -dynamiclib $^ -o $@ $(LDFLAGS) $(LIBS)
 
 clean:

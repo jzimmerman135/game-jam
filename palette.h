@@ -5,6 +5,9 @@ enum {
     COLOR_AVATAR_BORDER2,
     COLOR_TUBE_DEFAULT,
     COLOR_TUBE_SHADOW,
+    COLOR_TUBE_DEATH,
+    COLOR_TUBE_PLATFORM,
+    COLOR_TUBE_TOGGLE,
 };
 
 Color get_color(int clr);

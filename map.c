@@ -15,7 +15,7 @@ static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     move = cJSON_GetObjectItemCaseSensitive(data, "move");
     ypos = cJSON_GetObjectItemCaseSensitive(data, "ypos");
     leftpad = cJSON_GetObjectItemCaseSensitive(data, "leftpad");
-    type = cJSON_GetObjectItemCaseSensitive(data, "type");
+    type = cJSON_GetObjectItemCaseSensitive(data, "types");
 
     xoff = 0;
     xoff = move->valuedouble;
@@ -85,20 +85,71 @@ void init_map(Map *m)
     }
 }
 
+static void draw_tube(Tubes *tb)
+{
+    switch (tb->type) {
+        case TUBE_DEATH:
+            DrawRectangle(tb->rec.x + 8,
+                tb->rec.y + 8,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_SHADOW)
+                );
+            DrawRectangle(tb->rec.x,
+                tb->rec.y,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_DEATH)
+                );
+            break;
+        case TUBE_PLATFORM:
+            DrawRectangle(tb->rec.x + 8,
+                tb->rec.y + 8,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_SHADOW)
+                );
+            DrawRectangle(tb->rec.x,
+                tb->rec.y,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_PLATFORM)
+                );
+            break;
+        case TUBE_TOGGLE:
+            DrawRectangle(tb->rec.x + 8,
+                tb->rec.y + 8,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_SHADOW)
+                );
+            DrawRectangle(tb->rec.x,
+                tb->rec.y,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_TOGGLE)
+                );
+            break;
+        default:
+            DrawRectangle(tb->rec.x + 8,
+                tb->rec.y + 8,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_DEATH)
+                );
+            DrawRectangle(tb->rec.x,
+                tb->rec.y,
+                tb->rec.width,
+                tb->rec.height,
+                get_color(COLOR_TUBE_DEFAULT)
+                );
+            break;
+    }
+}
+
 void draw_map(Map *map) {
     (void)map;
     for (int i = 0; i < map->nTubes; i++) {
-        DrawRectangle(map->tubes[i].rec.x + 8,
-            map->tubes[i].rec.y + 8,
-            map->tubes[i].rec.width,
-            map->tubes[i].rec.height,
-            get_color(COLOR_TUBE_SHADOW)
-            );
-        DrawRectangle(map->tubes[i].rec.x,
-            map->tubes[i].rec.y,
-            map->tubes[i].rec.width,
-            map->tubes[i].rec.height,
-            get_color(COLOR_TUBE_DEFAULT)
-            );
+        draw_tube(&map->tubes[i]);
     }
 }

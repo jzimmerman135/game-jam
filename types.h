@@ -38,6 +38,7 @@ typedef struct Tubes {
 typedef struct {
     Tubes tubes[MAX_TUBES];
     int nTubes;
+    int visibility;
 } Map;
 
 #endif

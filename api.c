@@ -80,6 +80,13 @@ static int how_did_it_collide(game_state *gs, Tubes *tb) {
     return 0;
 }
 
+static void game_over(game_state *gs)
+{
+    Settings *settings = &gs->settings;
+    settings->gameOver = true;
+    settings->pause = false;
+}
+
 void handle_tube_collision(game_state *gs, Tubes *tb)
 {
     switch (tb->type) {
@@ -94,11 +101,17 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
             }
         }
             break;
+        case TUBE_TOGGLE:
+            gs->map.visibility = 1;
+            break;
+        case TUBE_BLUE:
+            if (gs->map.visibility == 0) {
+                game_over(gs);
+            }
+            break;
         case TUBE_DEATH:
         default: {
-            Settings *settings = &gs->settings;
-            settings->gameOver = true;
-            settings->pause = false;
+            game_over(gs);
             break;
         }
     }

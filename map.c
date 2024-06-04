@@ -51,6 +51,7 @@ void init_map(Map *m)
         fprintf(stderr, "Has it been generated yet?\n");
         exit(1);
     }
+    m->visibility = 0;
 
     i = 0;
 
@@ -85,7 +86,7 @@ void init_map(Map *m)
     }
 }
 
-static void draw_tube(Tubes *tb)
+static void draw_tube(Tubes *tb, int visibility)
 {
     switch (tb->type) {
         case TUBE_DEATH:
@@ -131,18 +132,20 @@ static void draw_tube(Tubes *tb)
                 );
             break;
         case TUBE_BLUE:
-            DrawRectangle(tb->rec.x + 8,
-                tb->rec.y + 8,
-                tb->rec.width,
-                tb->rec.height,
-                get_color(COLOR_TUBE_SHADOW)
-                );
-            DrawRectangle(tb->rec.x,
-                tb->rec.y,
-                tb->rec.width,
-                tb->rec.height,
-                get_color(COLOR_TUBE_BLUE)
-                );
+            if (visibility == 0) {
+                DrawRectangle(tb->rec.x + 8,
+                    tb->rec.y + 8,
+                    tb->rec.width,
+                    tb->rec.height,
+                    get_color(COLOR_TUBE_SHADOW)
+                    );
+                DrawRectangle(tb->rec.x,
+                    tb->rec.y,
+                    tb->rec.width,
+                    tb->rec.height,
+                    get_color(COLOR_TUBE_BLUE)
+                    );
+            }
             break;
         default:
             DrawRectangle(tb->rec.x + 8,
@@ -164,6 +167,6 @@ static void draw_tube(Tubes *tb)
 void draw_map(Map *map) {
     (void)map;
     for (int i = 0; i < map->nTubes; i++) {
-        draw_tube(&map->tubes[i]);
+        draw_tube(&map->tubes[i], map->visibility);
     }
 }

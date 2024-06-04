@@ -13,6 +13,7 @@ typedef struct {
 }  Settings;
 
 typedef struct Floppy {
+    Vector2 velocity;
     Vector2 position;
     int radius;
     Color color;

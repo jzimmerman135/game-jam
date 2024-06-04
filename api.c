@@ -7,6 +7,12 @@
 #define TUBES_WIDTH 80
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
+float clamp(float value, float min, float max)
+{
+    return value < min ? min : value > max ? max : value;
+}
 
 void open(void)
 {
@@ -32,6 +38,7 @@ void init(game_state *gs)
 
    Floppy floppy = {
         .radius = FLOPPY_RADIUS,
+        .velocity = (Vector2){ 300.0f, 0.0f },
         .position = (Vector2){ 0, screen.y / 2.0f },
         .color = (Color){0, 0, 0, 255},
     };
@@ -47,7 +54,10 @@ void init(game_state *gs)
     Map map;
 
     // only initialize the map once
-    init_map(&map);
+    if (gs->map.nTubes == 0)
+        init_map(&map);
+    else
+        map = gs->map;
 
     *gs = (game_state){
         .screen = screen,
@@ -58,11 +68,16 @@ void init(game_state *gs)
         .score = 0,
         .map = map,
         .hiScore = 0,
+        .delta = 0.0,
+        .elapsed = gs->elapsed,
     };
 }
 
 void UpdateGame(game_state *gs)
 {
+    gs->delta = GetFrameTime();
+    gs->elapsed = GetTime();
+
     Settings *settings = &gs->settings;
     if (settings->gameOver)
     {
@@ -76,18 +91,25 @@ void UpdateGame(game_state *gs)
     }
 
     if (IsKeyPressed('P')) settings->pause = !settings->pause;
-
     if (settings->pause)
         return;
 
     // update x offset of rectangles
-    gs->floppy.position.x += 2;
-    gs->camera.target.x = gs->floppy.position.x;
 
-    if (IsKeyDown(KEY_SPACE))
-        gs->floppy.position.y -= 3;
-    else
-        gs->floppy.position.y += 1;
+    float gravity = 7.0;
+    gs->floppy.velocity.y += gravity;
+
+    gs->floppy.position = (Vector2){
+        gs->floppy.position.x + gs->floppy.velocity.x * gs->delta,
+        gs->floppy.position.y + gs->floppy.velocity.y * gs->delta
+    };
+
+    if (IsKeyPressed(KEY_SPACE)) {
+        // TODO: CONFIGURE NICE JUMP KINEMATICS
+        gs->floppy.velocity.y = max(gs->floppy.velocity.y - 400., -300);
+    }
+
+    gs->camera.target.x = gs->floppy.position.x;
 
     // Check Collisions
     for (int i = 0; i < gs->map.nTubes; i++)

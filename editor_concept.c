@@ -37,6 +37,7 @@ bool try_open_editor(void)
     return true;
 }
 
+
 bool update(game_state *state)
 {
     BeginDrawing();
@@ -44,20 +45,26 @@ bool update(game_state *state)
     if (WindowShouldClose() || IsKeyPressed(KEY_ESCAPE))
         return false;
 
-    int started_editing = !state->is_editing && IsKeyPressed(KEY_E);
-    if (started_editing) {
+    bool user_started_editing = !state->is_editing && IsKeyPressed(KEY_E);
+    if (user_started_editing) {
         state->is_paused = true;
         state->is_editing = true;
         assert(try_open_editor());
         return true;
     }
 
-    int stopped_editing = state->is_paused && state->is_editing && IsKeyPressed(KEY_E);
-    if (stopped_editing) {
+    bool user_stopped_editing = state->is_paused && state->is_editing && IsKeyPressed(KEY_E);
+    if (user_stopped_editing) {
         state->is_editing = false;
         state->is_paused = false;
         state->api_version_id = LOAD_NEW_API; // ask for new api to be dlopen'd
         return true;
+    }
+
+    if (IsKeyPressed(KEY_LEFT)) {
+        state->api_version_id--;
+    } else if (IsKeyPressed(KEY_RIGHT)) {
+        state->api_version_id++;
     }
 
     if (state->is_paused) {
@@ -82,8 +89,18 @@ void render(const game_state *state)
     snprintf(text, 80, "Var: %d", state->var);
     DrawText(text, 200, 200, 50, BLUE);
 
+    snprintf(text, 80, "API Version Id: %d", state->api_version_id);
+    DrawText(text, 200, 100, 20, GREEN);
+
 skipdraw:
     EndDrawing();
+}
+
+bool step(game_state *state) {
+    if (!update(state))
+        return false;
+    render(state);
+    return true;
 }
 
 int get_api_version_id(const game_state *state)
@@ -101,8 +118,7 @@ const game_api shared_obj_api = {
     .open = open,
     .close = close,
     .init = init,
-    .update = update,
-    .render = render,
-    .get_api_version_id = get_api_version_id,
-    .set_api_version_id = set_api_version_id,
+    .step = step,
+    .requested_api_version_id = get_api_version_id,
+    .set_api_version_id_callback = set_api_version_id,
 };

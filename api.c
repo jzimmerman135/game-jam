@@ -35,6 +35,13 @@ void render(const game_state *state)
     EndDrawing();
 }
 
+bool step(game_state *state) {
+    if (!update(state))
+        return false;
+    render(state);
+    return true;
+}
+
 int get_api_version_id(const game_state *state)
 {
     return 0;
@@ -50,8 +57,7 @@ const game_api shared_obj_api = {
     .open = open,
     .close = close,
     .init = init,
-    .update = update,
-    .render = render,
-    .get_api_version_id = get_api_version_id,
-    .set_api_version_id = set_api_version_id,
+    .step = step,
+    .requested_api_version_id = get_api_version_id,
+    .set_api_version_id_callback = set_api_version_id,
 };

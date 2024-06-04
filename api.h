@@ -20,11 +20,10 @@ typedef struct {
   void (*init)(game_state *state);
 
   // returns false iff should close
-  bool (*update)(game_state *state);
-  void (*render)(const game_state *state);
+  bool (*step)(game_state *state);
 
-  int (*get_api_version_id)(const game_state *state);
-  void (*set_api_version_id)(game_state *state, int version_id);
+  int (*requested_api_version_id)(const game_state *state);
+  void (*set_api_version_id_callback)(game_state *state, int version_id);
 
   const size_t game_state_size;
 } game_api;

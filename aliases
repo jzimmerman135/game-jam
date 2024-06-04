@@ -1,0 +1,4 @@
+alias run="sh ./scripts/run.sh"
+alias build="sh ./scripts/build.sh"
+alias mapgen="sh ./scripts/mapgen.sh"
+alias clean="sh ./scripts/clean.sh"

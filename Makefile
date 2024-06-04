@@ -5,9 +5,15 @@ CFLAGS := -Wall -Wpedantic -g -I/opt/homebrew/include -fsanitize=address
 LDFLAGS := -L/opt/homebrew/lib
 LIBS := -lraylib
 
+include proto.mk
+
 all: game.out editortest.out
 
 game.out: main.o api.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+
+
+gameproto: $(PROTO_OBJ)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 
 editortest.out: main.o game_api.dylib

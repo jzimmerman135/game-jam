@@ -39,8 +39,8 @@ void init(game_state *gs)
     printf("initialized floppy to pos %f %f\n", floppy.position.x, floppy.position.y);
 
     Camera2D camera = {0};
-    camera.target = (Vector2){ floppy.position.x - 200.f, floppy.position.y + 20.0f };
-    camera.offset = (Vector2){ 200.0, screen.y / 2.0f};
+    camera.target = (Vector2){ floppy.position.x - 200.f, 0.0 };
+    camera.offset = (Vector2){ 200.0, 0.0 };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f;
 
@@ -48,11 +48,6 @@ void init(game_state *gs)
 
     // only initialize the map once
     init_map(&map);
-
-    // TODO: temporary needs to fix tube positions
-    // for (int i = 0; i < map.nTubes; i++) {
-    //     map.tubes[i].rec.y *= 200;
-    // }
 
     *gs = (game_state){
         .screen = screen,

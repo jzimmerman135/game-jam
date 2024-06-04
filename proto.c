@@ -70,6 +70,7 @@ void init_game_state(game_state *gs)
 
     gs->tubesSpeedX = 0;
     gs->superfx = false;
+    gs->xOffset = 0;
 }
 
 int main(void)
@@ -79,31 +80,19 @@ int main(void)
 
     InitGame(&G);
 
-#if defined(PLATFORM_WEB)
-    emscripten_set_main_loop(UpdateDrawFrame, 60, 1);
-#else
     SetTargetFPS(60);
 
-    // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
-    {
+    while (!WindowShouldClose()) {
         UpdateDrawFrame(&G);
     }
-#endif
     UnloadGame(&G);
 
-    CloseWindow();        // Close window and OpenGL context
+    CloseWindow();
     return 0;
 }
 
 const int vals[] = {2, 2, 50, 100, 120};
 int valpos = 0;
-
-int GetValue(void)
-{
-    //return -GetRandomValue(0, 120);
-    return 2;
-}
 
 void load_map(game_state *gs)
 {
@@ -178,6 +167,18 @@ void InitGame(game_state *gs)
     gs->gameOver = false;
     gs->superfx = false;
     gs->pause = false;
+    gs->xOffset = 0;
+}
+
+static Rectangle rectWithOffset(game_state *gs, Rectangle *r)
+{
+    Rectangle r_off;
+
+    r_off = *r;
+
+    r_off.x -= gs->xOffset;
+
+    return r_off;
 }
 
 // Update game (one frame)
@@ -189,12 +190,14 @@ void UpdateGame(game_state *gs)
 
         if (!gs->pause)
         {
+            // update x offset of rectangles
+            gs->xOffset += gs->tubesSpeedX;
             for (int i = 0; i < MAX_TUBES; i++) gs->tubesPos[i].x -= gs->tubesSpeedX;
 
             for (int i = 0; i < gs->nTubes*2; i += 2)
             {
-                gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
-                gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
+                //gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
+                //gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
             }
 
             if (IsKeyDown(KEY_SPACE) && !gs->gameOver) gs->floppy.position.y -= 3;
@@ -203,21 +206,28 @@ void UpdateGame(game_state *gs)
             // Check Collisions
             for (int i = 0; i < gs->nTubes*2; i++)
             {
-                if (CheckCollisionCircleRec(gs->floppy.position, gs->floppy.radius, gs->tubes[i].rec)) {
-                    //gs->gameOver = true;
-                    //gs->pause = false;
-                } else if ((gs->tubesPos[i/2].x < gs->floppy.position.x) && gs->tubes[i/2].active && !gs->gameOver) {
-                    gs->score += 100;
-                    gs->tubes[i/2].active = false;
+                int collide;
 
-                    //gs->superfx = true;
+                collide = CheckCollisionCircleRec(gs->floppy.position,
+                        gs->floppy.radius,
+                        rectWithOffset(gs, &gs->tubes[i].rec));
 
-                    if (gs->score > gs->hiScore) gs->hiScore = gs->score;
+                if (collide) {
+                    gs->gameOver = true;
+                    gs->pause = false;
                 }
+
+                // else if ((gs->tubesPos[i/2].x < gs->floppy.position.x) && gs->tubes[i/2].active && !gs->gameOver) {
+                //     gs->score += 100;
+                //     gs->tubes[i/2].active = false;
+
+                //     //gs->superfx = true;
+
+                //     if (gs->score > gs->hiScore) gs->hiScore = gs->score;
+                // }
             }
         }
-    }
-    else
+    } else
     {
         if (IsKeyPressed(KEY_ENTER))
         {
@@ -225,6 +235,11 @@ void UpdateGame(game_state *gs)
             gs->gameOver = false;
         }
     }
+}
+
+static void DrawRectWithOffset(game_state *gs, Rectangle *r, Color clr)
+{
+    DrawRectangle(r->x - gs->xOffset, r->y, r->width, r->height, clr);
 }
 
 // Draw game (one frame)
@@ -240,37 +255,36 @@ void DrawGame(game_state *gs)
 
             // Draw tubes
             for (int i = 0; i < gs->nTubes; i++) {
-
-                DrawRectangle(gs->tubes[i*2].rec.x,
-                        gs->tubes[i*2].rec.y,
-                        gs->tubes[i*2].rec.width,
-                        gs->tubes[i*2].rec.height, GRAY);
-                DrawRectangle(gs->tubes[i*2 + 1].rec.x,
-                        gs->tubes[i*2 + 1].rec.y,
-                        gs->tubes[i*2 + 1].rec.width,
-                        gs->tubes[i*2 + 1].rec.height, GRAY);
+                DrawRectWithOffset(gs, &gs->tubes[i*2].rec, GRAY);
+                DrawRectWithOffset(gs, &gs->tubes[i*2 + 1].rec, GRAY);
             }
 
             // Draw flashing fx (one frame only)
-            if (gs->superfx) {
-                DrawRectangle(0, 0, gs->screenWidth, gs->screenHeight, WHITE);
-                gs->superfx = false;
+            // if (gs->superfx) {
+            //     DrawRectangle(0, 0, gs->screenWidth, gs->screenHeight, WHITE);
+            //     gs->superfx = false;
+            // }
+
+            //DrawText(TextFormat("xoff: %i", gs->xOffset), 20, 20, 40, GRAY);
+            // DrawText(TextFormat("HI-SCORE: %04i", gs->hiScore), 20, 70, 20, LIGHTGRAY);
+
+            if (gs->pause) {
+                DrawText("GAME PAUSED",
+                        gs->screenWidth/2 - MeasureText("GAME PAUSED", 40)/2,
+                        gs->screenHeight/2 - 40, 40, GRAY);
             }
-
-            DrawText(TextFormat("%04i", gs->score), 20, 20, 40, GRAY);
-            DrawText(TextFormat("HI-SCORE: %04i", gs->hiScore), 20, 70, 20, LIGHTGRAY);
-
-            if (gs->pause) DrawText("GAME PAUSED", gs->screenWidth/2 - MeasureText("GAME PAUSED", 40)/2, gs->screenHeight/2 - 40, 40, GRAY);
+        } else {
+            DrawText("PRESS [ENTER] TO PLAY AGAIN",
+                    GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2,
+                    GetScreenHeight()/2 - 50, 20, GRAY);
         }
-        else DrawText("PRESS [ENTER] TO PLAY AGAIN", GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2, GetScreenHeight()/2 - 50, 20, GRAY);
 
     EndDrawing();
 }
 
-// Unload game variables
 void UnloadGame(game_state *gs)
 {
-    // TODO: Unload all dynamic loaded data (textures, sounds, models...)
+    
 }
 
 // Update and Draw (one frame)

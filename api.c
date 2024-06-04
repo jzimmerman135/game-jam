@@ -1,6 +1,7 @@
 #include "api.h"
 #include "raylib.h"
 #include "map.h"
+#include "palette.h"
 #include <stdio.h>
 
 #define FLOPPY_RADIUS 24
@@ -103,10 +104,9 @@ void UpdateGame(game_state *gs)
     }
 }
 
-
 void DrawGame(game_state *gs)
 {
-    ClearBackground(RAYWHITE);
+    ClearBackground(get_color(COLOR_BACKGROUND));
 
     if (gs->settings.gameOver)
     {
@@ -125,8 +125,11 @@ void DrawGame(game_state *gs)
 
     BeginMode2D(gs->camera);
 
-    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, DARKGRAY);
     draw_map(&gs->map);
+    DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
+    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
+    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));
+    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, get_color(COLOR_AVATAR));
 
     EndMode2D();
 }

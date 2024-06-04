@@ -94,6 +94,30 @@ int main(void)
 const int vals[] = {2, 2, 50, 100, 120};
 int valpos = 0;
 
+void load_tube(const cJSON *data, Tubes *tb, float *xpos)
+{
+    const cJSON *width, *height, *move, *ypos, *leftpad;
+    float xoff;
+
+    width = cJSON_GetObjectItemCaseSensitive(data, "width");
+    height = cJSON_GetObjectItemCaseSensitive(data, "height");
+    move = cJSON_GetObjectItemCaseSensitive(data, "move");
+    ypos = cJSON_GetObjectItemCaseSensitive(data, "ypos");
+    leftpad = cJSON_GetObjectItemCaseSensitive(data, "leftpad");
+  
+    xoff = 0;
+    xoff = move->valuedouble;
+    tb->rec.x = *xpos;
+    if (leftpad != NULL) {
+        tb->rec.x += leftpad->valuedouble;
+        xoff += leftpad->valuedouble;
+    }
+    tb->rec.y = ypos->valuedouble;
+    tb->rec.width = width->valuedouble;
+    tb->rec.height = height->valuedouble;
+    *xpos += xoff;
+}
+
 void load_map(game_state *gs)
 {
     cJSON *json;
@@ -108,6 +132,8 @@ void load_map(game_state *gs)
 
     if (fp != NULL) {
         const cJSON *rects, *rect;
+        float xpos;
+
         fseek(fp, 0L, SEEK_END);
         nbytes = ftell(fp);
         str = malloc(nbytes + 1);
@@ -116,14 +142,19 @@ void load_map(game_state *gs)
         str[nbytes] = 0;
         fclose(fp);
         json = cJSON_Parse(str);
-        printf("%s\n", str);
+        if (json == NULL) {
+            fprintf(stderr, "!!!!invalid map data!!!!");
+        }
+        free(str);
 
         rects = cJSON_GetObjectItemCaseSensitive(json, "rects");
 
         i = 0;
+        xpos = 0;
         cJSON_ArrayForEach(rect, rects) {
-            gs->tubesPos[i].x = 400 + 280*i;
-            gs->tubesPos[i].y = -rect->valuedouble;
+            //gs->tubesPos[i].x = 400 + 280*i;
+            //gs->tubesPos[i].y = -rect->valuedouble;
+            load_tube(rect, &gs->tubes[i], &xpos);
             i++;
         }
 
@@ -141,26 +172,26 @@ void InitGame(game_state *gs)
 
     for (int i = 0; i < MAX_TUBES; i++)
     {
-        gs->tubesPos[i].x = 400 + 280*i;
+        gs->tubesPos[i].x = 0;
         gs->tubesPos[i].y = 0;
     }
 
     load_map(gs);
 
-    for (int i = 0; i < gs->nTubes*2; i += 2)
-    {
-        gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
-        gs->tubes[i].rec.y = gs->tubesPos[i/2].y;
-        gs->tubes[i].rec.width = TUBES_WIDTH;
-        gs->tubes[i].rec.height = 255;
+    // for (int i = 0; i < gs->nTubes*2; i += 2)
+    // {
+    //     // gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
+    //     // gs->tubes[i].rec.y = gs->tubesPos[i/2].y;
+    //     // gs->tubes[i].rec.width = TUBES_WIDTH;
+    //     // gs->tubes[i].rec.height = 255;
 
-        gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
-        gs->tubes[i+1].rec.y = 600 + gs->tubesPos[i/2].y - 255;
-        gs->tubes[i+1].rec.width = TUBES_WIDTH;
-        gs->tubes[i+1].rec.height = 255;
+    //     // gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
+    //     // gs->tubes[i+1].rec.y = 600 + gs->tubesPos[i/2].y - 255;
+    //     // gs->tubes[i+1].rec.width = TUBES_WIDTH;
+    //     // gs->tubes[i+1].rec.height = 255;
 
-        gs->tubes[i/2].active = true;
-    }
+    //     // gs->tubes[i/2].active = true;
+    // }
 
     gs->score = 0;
 
@@ -192,19 +223,12 @@ void UpdateGame(game_state *gs)
         {
             // update x offset of rectangles
             gs->xOffset += gs->tubesSpeedX;
-            for (int i = 0; i < MAX_TUBES; i++) gs->tubesPos[i].x -= gs->tubesSpeedX;
-
-            for (int i = 0; i < gs->nTubes*2; i += 2)
-            {
-                //gs->tubes[i].rec.x = gs->tubesPos[i/2].x;
-                //gs->tubes[i+1].rec.x = gs->tubesPos[i/2].x;
-            }
 
             if (IsKeyDown(KEY_SPACE) && !gs->gameOver) gs->floppy.position.y -= 3;
             else gs->floppy.position.y += 1;
 
             // Check Collisions
-            for (int i = 0; i < gs->nTubes*2; i++)
+            for (int i = 0; i < gs->nTubes; i++)
             {
                 int collide;
 
@@ -255,8 +279,8 @@ void DrawGame(game_state *gs)
 
             // Draw tubes
             for (int i = 0; i < gs->nTubes; i++) {
-                DrawRectWithOffset(gs, &gs->tubes[i*2].rec, GRAY);
-                DrawRectWithOffset(gs, &gs->tubes[i*2 + 1].rec, GRAY);
+                DrawRectWithOffset(gs, &gs->tubes[i].rec, GRAY);
+                //DrawRectWithOffset(gs, &gs->tubes[i*2 + 1].rec, GRAY);
             }
 
             // Draw flashing fx (one frame only)

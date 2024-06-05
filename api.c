@@ -9,6 +9,7 @@
 #include "types.h"
 #include "intro.h"
 
+//#define GODMODE
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
 
@@ -42,15 +43,17 @@ void close(void)
 }
 
 const Vector2 floppy_initial_position = { 0, 300 };
-const Vector2 floppy_initial_velocity = { 100.0f, 0.0f };
+const Vector2 floppy_initial_velocity = { 400.0f, 0.0f };
 const Vector2 camera_offset = { 200.0f, 0.0f };
 
 Camera2D init_camera(Vector2 floppy_position) {
     return (Camera2D){
-        .offset = (Vector2){ 200.0f, 0 },
+        //.offset = (Vector2){ 200.0f, 0 },
+        .offset = (Vector2){ 200.0f, 200 },
         .target = (Vector2){ floppy_position.x, 0.0 },
         .rotation = 0.0f,
-        .zoom = 1.0f,
+        //.zoom = 1.0f,
+        .zoom = 0.5f,
     };
 }
 
@@ -122,8 +125,10 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
                 break;
         case TUBE_DEATH:
         default: {
+#ifndef GODMODE
             gs->settings.gameOver = true;
             gs->settings.pause = true;
+#endif
             break;
         }
     }

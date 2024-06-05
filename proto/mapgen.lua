@@ -1,6 +1,5 @@
 json = require("lib/json")
 
-
 screen_width = 800
 screen_height = 600
 screen_height_25 = screen_height * 0.25
@@ -84,38 +83,142 @@ function add_rect(map, rect)
 end
 
 
-map = {
-    rects = {
+function lvl1()
+    local map = {
+        rects = {
+        }
     }
-}
 
-t = upper_tube(screen_height_50 * 0.8)
-t.leftpad = screen_width * 0.5;
-add_rect(map, t)
-t = lower_tube(screen_height_50)
-t.move = tube_width*1.3;
-add_rect(map, t)
+    t = upper_tube(screen_height_50 * 0.8)
+    t.leftpad = screen_width * 0.5;
+    add_rect(map, t)
+    t = lower_tube(screen_height_50)
+    t.move = tube_width*1.3;
+    add_rect(map, t)
 
-t = platform(from_bottom(0.5), tube_width*4)
-t.move = tube_width*4
-add_rect(map, t)
+    t = platform(from_bottom(0.5), tube_width*4)
+    t.move = tube_width*4
+    add_rect(map, t)
 
-t = platform(from_bottom(0.25), tube_width*3)
-t.move = tube_width*3
-add_rect(map, t)
+    t = platform(from_bottom(0.25), tube_width*3)
+    t.move = tube_width*3
+    add_rect(map, t)
 
-t = platform(from_bottom(0.1), tube_width*3)
-t.move = tube_width*3.5
-add_rect(map, t)
+    t = platform(from_bottom(0.1), tube_width*3)
+    t.move = tube_width*3.5
+    add_rect(map, t)
 
-t = toggle(from_bottom(0.3))
-t.move = tube_width*2
-add_rect(map, t)
+    t = toggle(from_bottom(0.3))
+    t.move = tube_width*2
+    add_rect(map, t)
 
-t = barrier()
-t.types = rect_types.blue
-add_rect(map, t)
+    t = barrier()
+    t.types = rect_types.blue
+    add_rect(map, t)
 
-fp = io.open("proto/maps/01.json", "w")
-fp:write(json.encode(map))
-fp:close()
+    fp = io.open("proto/maps/01.json", "w")
+    fp:write(json.encode(map))
+    fp:close()
+end
+
+function lvl2()
+    local map = {
+        rects = {
+        }
+    }
+
+    local leftpad = screen_width * 0.5
+    local squeeze = 0.6
+
+    local tubes = {
+        {upper_tube, screen_height_50 * 0.5, tube_width * 2},
+        {lower_tube, screen_height_50, tube_width * 2},
+
+        {upper_tube, screen_height_50*(squeeze - 0.3), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.3), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.3), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.4), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze + 0.5), 0},
+        {lower_tube, screen_height_50*(squeeze - 0.5), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze + 0.7), 0},
+        {lower_tube, screen_height_50*(squeeze - 0.7), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.1), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.1), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.2), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.2), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.3), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.3), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.1), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.1), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.4), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.4), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.5), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.5), tube_width * 3},
+
+        {upper_tube, screen_height_50*(squeeze - 0.3), 0},
+        {lower_tube, screen_height_50*(squeeze + 0.3), tube_width * 3},
+    }
+
+    -- get total length
+
+    total_len = 0
+    for _, tb in pairs(tubes) do
+        total_len = total_len + tb[2]
+    end
+
+    -- add barriers
+
+    total_len = total_len + leftpad
+
+    local top_barrier = rect {
+        ypos = -screen_height_25 - 100,
+        width = total_len,
+        height = screen_height_25,
+        move = 0
+    }
+
+    local bottom_barrier = rect {
+        ypos = screen_height,
+        width = total_len,
+        height = screen_height_25,
+        move = 0
+    }
+
+    add_rect(map, top_barrier)
+    add_rect(map, bottom_barrier)
+
+    for pos, tb in pairs(tubes) do
+        local tubefun = tb[1]
+        local tubelen = tb[2]
+        local tubemv = tb[3]
+        local t = tubefun(tubelen)
+        if (pos == 1) then
+            t.leftpad = leftpad
+        end
+
+        t.move = tubemv
+        add_rect(map, t)
+    end
+    -- t = upper_tube(screen_height_50 * 0.8)
+    -- t.leftpad = screen_width * 0.5;
+    -- add_rect(map, t)
+    -- t = lower_tube(screen_height_50)
+    -- t.move = tube_width*1.3;
+    -- add_rect(map, t)
+
+    local fp = io.open("proto/maps/02.json", "w")
+    fp:write(json.encode(map))
+    fp:close()
+end
+
+lvl1()
+lvl2()

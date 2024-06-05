@@ -17,7 +17,7 @@ void intro_setup(Intro *intro)
 {
     Font fnt = LoadFont("Ac437_IBM_BIOS.ttf");
     intro->ibmfont = fnt;
-    intro->running = 1;
+    intro->running = 0;
     intro->pos = 0;
 }
 

@@ -4,3 +4,4 @@
 raylib
 *.dylib
 .game_api*
+*.txt.h

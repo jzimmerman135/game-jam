@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "map.h"
-#include "api.h"
 #include "lib/cJSON/cJSON.h"
 #include "palette.h"
+#include <stdlib.h>
 
 static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
 {
@@ -101,4 +101,8 @@ void draw_map(Map *map) {
             get_color(COLOR_TUBE_DEFAULT)
             );
     }
+}
+
+src_file_id relevant_src_file_id_from_world_pos(const Map *map, Vector2 playerpos) {
+    return FIRST_FILE;
 }

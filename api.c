@@ -3,6 +3,9 @@
 #include "map.h"
 #include "palette.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "powerups.h"
+#include "types.h"
 
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
@@ -17,13 +20,32 @@ float clamp(float value, float min, float max)
 
 void open(void)
 {
+    if (getenv("EDITOR") == NULL) {
+        fprintf(stderr, "EDITOR environment variable must be set to play\n");
+        exit(1);
+    }
+
     InitWindow(800, 600, "florpheus");
+    SetExitKey(0);
     SetTargetFPS(60);
 }
 
 void close(void)
 {
     CloseWindow();
+}
+
+const Vector2 floppy_initial_position = { 0, 300 };
+const Vector2 floppy_initial_velocity = { 100.0f, 0.0f };
+const Vector2 camera_offset = { 200.0f, 0.0f };
+
+Camera2D init_camera(Vector2 floppy_position) {
+    return (Camera2D){
+        .offset = (Vector2){ 200.0f, 0 },
+        .target = (Vector2){ floppy_position.x, 0.0 },
+        .rotation = 0.0f,
+        .zoom = 1.0f,
+    };
 }
 
 void init(game_state *gs)
@@ -37,28 +59,18 @@ void init(game_state *gs)
         .pause = false,
     };
 
-   Floppy floppy = {
+    Floppy floppy = (Floppy){
         .radius = FLOPPY_RADIUS,
-        .velocity = (Vector2){ 300.0f, 0.0f },
-        .position = (Vector2){ 0, screen.y / 2.0f },
-        .color = (Color){0, 0, 0, 255},
+        .velocity = floppy_initial_velocity,
+        .position = floppy_initial_position,
     };
 
-    printf("initialized floppy to pos %f %f\n", floppy.position.x, floppy.position.y);
-
-    Camera2D camera = {0};
-    camera.target = (Vector2){ floppy.position.x - 200.f, 0.0 };
-    camera.offset = (Vector2){ 200.0, 0.0 };
-    camera.rotation = 0.0f;
-    camera.zoom = 1.0f;
-
+    Camera2D camera = init_camera(floppy.position);
     Map map;
+    init_map(&map);
 
-    // only initialize the map once
-    if (gs->map.nTubes == 0)
-        init_map(&map);
-    else
-        map = gs->map;
+    Powerups powerups = {0};
+    powerups.radius = 10;
 
     *gs = (game_state){
         .screen = screen,
@@ -71,7 +83,19 @@ void init(game_state *gs)
         .hiScore = 0,
         .delta = 0.0,
         .elapsed = gs->elapsed,
+        .debugvalue = 0,
+        .powerups = powerups,
     };
+}
+
+void reset(game_state *game)
+{
+    game->settings.gameOver = false;
+    game->settings.pause = false;
+    game->settings.api_version = 0;
+    game->floppy.position = floppy_initial_position;
+    game->floppy.velocity = floppy_initial_velocity;
+    game->camera = init_camera(game->floppy.position);
 }
 
 void UpdateGame(game_state *gs)
@@ -80,20 +104,33 @@ void UpdateGame(game_state *gs)
     gs->elapsed = GetTime();
 
     Settings *settings = &gs->settings;
-    if (settings->gameOver)
-    {
+    if (settings->gameOver) {
         if (IsKeyPressed(KEY_ENTER))
-        {
-            printf("RESTARTING\n");
-            init(gs);
-            return;
-        }
+            reset(gs);
         return;
+    }
+
+    if (IsKeyPressed(KEY_D)) {
+        printf("npowers %d, rad %d\n", gs->powerups.nPowerups, gs->powerups.radius);
+        printf("api %d, maxapi %d\n", gs->settings.api_version, gs->settings.max_api_version);
     }
 
     if (IsKeyPressed('P')) settings->pause = !settings->pause;
     if (settings->pause)
         return;
+
+    if (IsKeyPressed(KEY_E)) {
+        int srcfile = relevant_src_file_id_from_world_pos(&gs->map, gs->floppy.position);
+        char *filename = decode_fileid(srcfile);
+        try_open_text_editor(filename);
+    }
+
+    if (IsKeyPressed(KEY_N) && settings->api_changed) {
+        printf("started it here\n");
+        place_powerup(&gs->powerups, gs->floppy.position, ++settings->max_api_version);
+        printf("made it here\n");
+        gs->settings.api_changed = false;
+    }
 
     float gravity = 7.0;
     gs->floppy.velocity.y += gravity;
@@ -111,6 +148,16 @@ void UpdateGame(game_state *gs)
     gs->camera.target.x = gs->floppy.position.x;
 
     // Check Collisions
+    for (int i = 0; i < gs->powerups.nPowerups; i++) {
+        Powerup *powerup = &gs->powerups.powerup[i];
+        bool collided = CheckCollisionCircles(
+            gs->floppy.position, gs->floppy.radius, powerup->position, gs->powerups.radius);
+        if (collided) {
+            gs->settings.api_version = powerup->api_version_id;
+            break;
+        }
+    }
+
     for (int i = 0; i < gs->map.nTubes; i++)
     {
         Tubes *tube = &gs->map.tubes[i];
@@ -128,8 +175,11 @@ void DrawGame(game_state *gs)
 {
     ClearBackground(get_color(COLOR_BACKGROUND));
 
-    if (gs->settings.gameOver)
-    {
+    char buf[256];
+    snprintf(buf, 256, "api_version %d", gs->settings.api_version);
+    DrawText(buf, 0, 0, 20, gs->settings.api_changed ? BLUE : RED);
+
+    if (gs->settings.gameOver) {
         DrawText("PRESS [ENTER] TO PLAY AGAIN",
             gs->screen.x / 2.0 - (float)MeasureText("PRESS [ENTER] TO PLAY AGAIN", 40)/2,
             gs->screen.y / 2.0 - 40, 40, RED);
@@ -140,23 +190,29 @@ void DrawGame(game_state *gs)
         DrawText("GAME PAUSED",
                 gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
                 gs->screen.y / 2.0 - 40, 40, RED);
-        return;
     }
+
 
     BeginMode2D(gs->camera);
 
     draw_map(&gs->map);
-    DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
-    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
-    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));
-    DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, get_color(COLOR_AVATAR));
+    draw_powerups(&gs->powerups);
+
+    {
+        DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
+        DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
+        DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));
+        DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, get_color(COLOR_AVATAR));
+        if (gs->settings.api_changed)
+            DrawCircle(gs->floppy.position.x + 32.0, gs->floppy.position.y + 8.0, gs->powerups.radius, ORANGE);
+    }
 
     EndMode2D();
 }
 
 bool step(game_state *state) {
     BeginDrawing();
-    if (IsKeyPressed(KEY_ESCAPE))
+    if (WindowShouldClose())
         return false;
 
     UpdateGame(state);
@@ -171,9 +227,9 @@ int requested_api_version_id(const game_state *state)
     return state->settings.api_version;
 }
 
-void set_api_version_id(game_state *state, int version_id) {
-    state->settings.api_version = version_id;
-    state->settings.max_api_version = max(version_id, state->settings.max_api_version);
+void set_api_changed(game_state *state)
+{
+    state->settings.api_changed = true;
 }
 
 const game_api shared_obj_api = {
@@ -182,6 +238,6 @@ const game_api shared_obj_api = {
     .init = init,
     .step = step,
     .requested_api_version_id = requested_api_version_id,
-    .set_api_version_id_callback = set_api_version_id,
-    .game_state_size = sizeof(game_state)
+    .game_state_size = sizeof(game_state),
+    .api_changed_callback = set_api_changed,
 };

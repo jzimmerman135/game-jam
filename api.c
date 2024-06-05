@@ -11,7 +11,7 @@
 #include "types.h"
 #include "intro.h"
 
-//#define GODMODE
+// #define GODMODE
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
 
@@ -140,6 +140,7 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
 
 void reset(game_state *game)
 {
+    game->map.scale = (Vector2){1.0, 1.0};
     game->settings.gameOver = false;
     game->settings.pause = false;
     game->settings.api_version = 0;
@@ -195,7 +196,6 @@ void UpdateGame(game_state *gs)
         gs->settings.api_changed = false;
     }
 
-
     // Positive real velocity unintuitively goes downward, so we abstract this away to user
     gs->floppy.velocity = flip_y(gs->floppy.velocity);
     gs->floppy.velocity = update_floppy_velocity(gs->floppy.velocity, gs->delta, IsKeyPressed(KEY_SPACE));
@@ -205,7 +205,6 @@ void UpdateGame(game_state *gs)
         gs->floppy.position.x + gs->floppy.velocity.x * gs->delta,
         gs->floppy.position.y + gs->floppy.velocity.y * gs->delta
     };
-
 
     gs->camera.target.x = gs->floppy.position.x;
 
@@ -224,7 +223,7 @@ void UpdateGame(game_state *gs)
     for (int i = 0; i < gs->map.nTubes; i++) {
         Tubes *tube = &gs->map.tubes[i];
         bool collided = CheckCollisionCircleRec(
-            gs->floppy.position, gs->floppy.radius, tube->rec);
+            gs->floppy.position, gs->floppy.radius, transform_rec(tube->rec, gs->map.scale, gs->floppy.position));
         if (collided) {
             handle_tube_collision(gs, tube);
         }
@@ -260,13 +259,23 @@ void DrawGame(game_state *gs)
 
     BeginMode2D(gs->camera);
 
-    draw_map(&gs->map);
+    if (IsKeyDown(KEY_RIGHT)) {
+        gs->map.scale.x += (3.0 - gs->map.scale.x) * 0.08;
+        gs->floppy.velocity.x += (floppy_initial_velocity.x / 3.0 - gs->floppy.velocity.x) * 0.08;
+    }
+    else {
+        gs->map.scale.x += (1.0 - gs->map.scale.x) * 0.05;
+        gs->floppy.velocity.x += (floppy_initial_velocity.x - gs->floppy.velocity.x) * 0.05;
+    }
+
+    Vector2 origin = (Vector2){gs->floppy.position.x, gs->floppy.position.y};
+    draw_map(&gs->map, origin);
 
     for (int i = 0; i < gs->powerups.nPowerups; i++) {
         draw_powerup(gs->powerups.powerup[i]);
     }
 
-    {
+    { // draw floppy
         DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));

@@ -43,6 +43,7 @@ typedef struct Tubes {
 
 typedef struct {
     Tubes tubes[MAX_TUBES];
+    Vector2 scale;
     int nTubes;
     int visibility;
 } Map;

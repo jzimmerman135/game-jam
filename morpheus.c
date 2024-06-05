@@ -86,7 +86,5 @@ void draw_secret_message(Morpheus *morpheus, float elapsed) {
         DrawRectangle(0, 0, MeasureText(msg, 30) + padding*2, 30 + padding*2, BLACK);
         DrawText(msg, padding, padding, 30, fgcolor);
         morpheus->statement_id = 0;
-        DrawRectangle(0, 0, 200, 50, BLACK);
-        DrawText("Psst! Check your terminal", 0, 0, 30, GREEN);
     }
 }

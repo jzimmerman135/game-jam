@@ -6,7 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-const char cowpheus[] = "morpheus: moo!";
+const char cowpheus[] = "\n\n\nmorpheus: moo! (hit any key)";
 const char bluepill[] = "bluepill";
 
 void set_nonblocking_mode(int enable) {
@@ -52,7 +52,7 @@ void update_morpheus(Morpheus *morpheus)
         switch (morpheus->statement_id) {
             case 0:
                 printf("%s\n", cowpheus);
-                printf("respond to continue\n");
+                printf("hit any key to continue\n");
                 morpheus->last_said = morpheus->statement_id;
                 break;
             case 1:
@@ -80,7 +80,11 @@ void draw_secret_message(Morpheus *morpheus, float elapsed) {
         return;
 
     if (morpheus->statement_id == 0) {
-        DrawRectangle(0, 0, 200, 50, BLACK);
-        DrawText("Psst! Check your terminal", 0, 0, 30, GREEN);
+        const char *msg ="Psst! Hit P and Check your terminal!"; 
+        int padding = 10;
+        Color fgcolor = (Color){0x4e, 0xDc, 0x4e, 0xff};
+        DrawRectangle(0, 0, MeasureText(msg, 30) + padding*2, 30 + padding*2, BLACK);
+        DrawText(msg, padding, padding, 30, fgcolor);
+        morpheus->statement_id = 0;
     }
 }

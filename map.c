@@ -34,6 +34,7 @@ static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     tb->rec.height = height->valuedouble;
     tb->color = (Color){0, 0, 0, 255};
     tb->type = floor(type->valuedouble);
+    tb->toggled = 0;
     *xpos += xoff;
 }
 
@@ -46,7 +47,7 @@ void init_map(Map *m)
     int i;
     const char *mapFilePath;
 
-    mapFilePath = "proto/maps/02.json";
+    mapFilePath = "proto/maps/03.json";
     fp = fopen(mapFilePath, "r");
 
     if (fp == NULL) {
@@ -131,7 +132,7 @@ static void draw_tube(Tubes *tb, Vector2 scale, Vector2 origin, int visibility)
             break;
         case TUBE_TOGGLE:
             DrawRectangleRec(shadowrec, get_color(COLOR_TUBE_SHADOW));
-            DrawRectangleRec(rec, get_color(COLOR_TUBE_TOGGLE));
+            DrawRectangleRec(rec, get_color(COLOR_TUBE_BLUE));
             break;
         case TUBE_BLUE:
             if (visibility == 0) {
@@ -140,7 +141,7 @@ static void draw_tube(Tubes *tb, Vector2 scale, Vector2 origin, int visibility)
             }
             break;
         default:
-            DrawRectangleRec(shadowrec, get_color(COLOR_TUBE_DEATH));
+            DrawRectangleRec(shadowrec, get_color(COLOR_TUBE_SHADOW));
             DrawRectangleRec(rec, get_color(COLOR_TUBE_DEFAULT));
             break;
     }

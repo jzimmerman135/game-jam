@@ -11,9 +11,13 @@
 #include "types.h"
 #include "intro.h"
 
-// #define GODMODE
+// cheat codes
+//#define ZOOMITOUT
+//#define GODMODE
+
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
+
 
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -50,10 +54,18 @@ const Vector2 camera_offset = { 200.0f, 0.0f };
 
 Camera2D init_camera(Vector2 floppy_position) {
     return (Camera2D){
+#ifndef ZOOMITOUT
         .offset = (Vector2){ 200.0f, 0 },
+#else
+        .offset = (Vector2){ 200.0f, 200.0 },
+#endif
         .target = (Vector2){ floppy_position.x, 0.0 },
         .rotation = 0.0f,
+#ifndef ZOOMITOUT
         .zoom = 1.0f,
+#else
+        .zoom = 0.2f,
+#endif
     };
 }
 
@@ -118,10 +130,12 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
             if (direction == 0) {
                 /* upper: snap to right above */
                 gs->floppy.position.y = tb->rec.y - gs->floppy.radius;
+                gs->floppy.velocity.y = 0;
             }
         }
             break;
         case TUBE_TOGGLE:
+            tb->toggled = 1;
             gs->map.visibility = 1;
             break;
         case TUBE_BLUE:
@@ -152,6 +166,8 @@ void reset(game_state *game)
 Vector2 flip_y(Vector2 v) {
     return (Vector2){v.x, -v.y};
 }
+
+void update_camera(game_state *gs);
 
 void UpdateGame(game_state *gs)
 {
@@ -206,7 +222,7 @@ void UpdateGame(game_state *gs)
         gs->floppy.position.y + gs->floppy.velocity.y * gs->delta
     };
 
-    gs->camera.target.x = gs->floppy.position.x;
+    update_camera(gs);
 
     // Check Pill Collisions
     for (int i = 0; i < gs->powerups.nPowerups; i++) {
@@ -238,7 +254,6 @@ void DrawGame(game_state *gs)
     }
 
     draw_background(gs->assets, gs->camera, gs->settings.api_version);
-    draw_secret_message(&gs->morpheus, gs->elapsed);
 
     char buf[256];
     snprintf(buf, 256, "api_version %d", gs->settings.api_version);
@@ -290,6 +305,8 @@ void DrawGame(game_state *gs)
     }
 
     EndMode2D();
+
+    draw_secret_message(&gs->morpheus, gs->elapsed);
 }
 
 bool step(game_state *state) {

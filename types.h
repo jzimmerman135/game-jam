@@ -39,6 +39,7 @@ typedef struct Tubes {
     Color color;
     bool active;
     int type;
+    int toggled;
 } Tubes;
 
 typedef struct {

@@ -1,5 +1,10 @@
-#include "raylib.h"
 #include "palette.h"
+
+const Color background_palette[N_BACKGROUND_PALETTES] = {
+    CLITERAL(Color){0xFF, 0xFF, 0xBA, 0xFF},
+    CLITERAL(Color){0xFF, 0xDD, 0xFF, 0xFF},
+    CLITERAL(Color){0xDD, 0xDD, 0xFF, 0xFF},
+};
 
 const Color palette[] = {
     /* COLOR_BACKGROUND */

@@ -5,13 +5,16 @@ CFLAGS := -Wall -Wpedantic -g3 -I/opt/homebrew/include -fsanitize=address
 LDFLAGS := -L/opt/homebrew/lib
 LIBS := -lraylib
 
-OBJS = api.o map.o lib/cJSON/cJSON.o powerups.o intro.o
-OBJS+=palette.o jump.o
+OBJS := api.o map.o lib/cJSON/cJSON.o powerups.o intro.o
+OBJS += palette.o jump.o morpheus.o
 ASSETS=intro.txt.h prophecy.txt.h flapflap.txt.h
 
 all: $(ASSETS) game.out game_api.dylib
 
 include proto.mk
+
+terminaltest.out: terminaltest.o
+	$(CC) $(CFLAGS) $^ -o $@
 
 game.out: main.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)

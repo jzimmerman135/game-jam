@@ -7,6 +7,9 @@
 #include <unistd.h>
 #include "palette.h"
 #include <termios.h>
+#include "raymath.h"
+
+const float powerup_radius = 10.0;
 
 void place_powerup(Powerups *powerups, Vector2 pos, int id) {
     if (powerups->nPowerups > MAX_POWERUPS) {
@@ -14,7 +17,7 @@ void place_powerup(Powerups *powerups, Vector2 pos, int id) {
     }
     powerups->powerup[powerups->nPowerups].position = pos;
     powerups->powerup[powerups->nPowerups].api_version_id = id;
-    powerups->powerup[powerups->nPowerups].color = ORANGE;
+    powerups->powerup[powerups->nPowerups].color = RED;
     powerups->nPowerups++;
 }
 
@@ -54,16 +57,17 @@ bool try_open_text_editor(Settings *settings, char *filename) {
     return true;
 }
 
-void draw_powerups(Powerups *powerups) {
-    for (int i = 0; i < powerups->nPowerups % MAX_POWERUPS; i++) {
-        Powerup p = powerups->powerup[i];
-        DrawCircleV(p.position, powerups->radius, p.color);
-    }
+void draw_powerup(Powerup p)
+{
+    DrawEllipse(p.position.x, p.position.y, 20.0, powerup_radius, p.color);
+    DrawEllipse(p.position.x - 6, p.position.y - 5, 20.0 / 4., powerup_radius / 4., ColorAlpha(WHITE, 0.5));
 }
 
 void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint);
 
 void draw_background(Assets assets, Camera2D camera, int api_version) {
+    Color backgroundcol = background_palette[api_version % N_BACKGROUND_PALETTES];
+    ClearBackground(backgroundcol);
     DrawTextureTiled(
         assets.textures[0],
         (Rectangle){ 0, 0, 32, 30 },
@@ -71,12 +75,13 @@ void draw_background(Assets assets, Camera2D camera, int api_version) {
         (Vector2){ fmodf(camera.target.x / 4.0, 32.0f), 0 },
         0.0,
         5.0,
-        ColorAlpha(get_color(COLOR_BACKGROUND), 0.04)
+        ColorAlpha(background_palette[api_version], 0.04)
     );
 }
 
 
 // Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
+// Code taken from raylib/examples/textures/texture_tiling.c
 void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint)
 {
     if ((texture.id <= 0) || (scale <= 0.0f)) return;  // Wanna see a infinite loop?!...just delete this line!

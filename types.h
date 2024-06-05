@@ -58,7 +58,6 @@ typedef struct {
 } Powerup;
 
 typedef struct {
-    int radius;
     int nPowerups;
     Powerup powerup[MAX_POWERUPS];
 } Powerups;

@@ -1,6 +1,7 @@
 #ifndef GAME_API_H
 #define GAME_API_H
 
+#include "morpheus.h"
 #include "stdbool.h"
 #include <stdlib.h>
 #include "raylib.h"
@@ -19,6 +20,7 @@ struct game_state {
     Map map;
     Powerups powerups;
     Assets assets;
+    Morpheus morpheus;
 
     float delta;
     float elapsed;

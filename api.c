@@ -1,4 +1,6 @@
 #include "api.h"
+#include "morpheus.h"
+#include "raymath.h"
 #include "raylib.h"
 #include "map.h"
 #include "palette.h"
@@ -58,6 +60,12 @@ void init(game_state *gs)
 {
     Vector2 screen = {800, 600};
 
+    Morpheus morpheus = {
+        .last_said = -1,
+        .shutup = false,
+        .statement_id = 0,
+    };
+
     Settings settings = {
         .api_version = 0,
         .max_api_version = 0,
@@ -75,9 +83,6 @@ void init(game_state *gs)
     Map map;
     init_map(&map);
 
-    Powerups powerups = {0};
-    powerups.radius = 10;
-
     Assets assets;
     assets.textures[0] = LoadTexture("bits.png");
 
@@ -92,9 +97,10 @@ void init(game_state *gs)
         .map = map,
         .delta = 0.0,
         .elapsed = gs->elapsed,
-        .powerups = powerups,
+        .powerups = (Powerups){0},
         .assets = assets,
-        .intro = intro
+        .intro = intro,
+        .morpheus = morpheus
     };
 }
 
@@ -149,35 +155,35 @@ void UpdateGame(game_state *gs)
         intro_update(&gs->intro);
         return;
     }
+
     gs->delta = GetFrameTime();
     gs->elapsed = GetTime();
+    update_morpheus(&gs->morpheus);
 
     Settings *settings = &gs->settings;
+
     if (settings->gameOver) {
         if (IsKeyPressed(KEY_ENTER))
             reset(gs);
         return;
     }
 
-    if (IsKeyPressed(KEY_D)) {
-        printf("npowers %d, rad %d\n", gs->powerups.nPowerups, gs->powerups.radius);
-        printf("api %d, maxapi %d\n", gs->settings.api_version, gs->settings.max_api_version);
+    if (IsKeyPressed(KEY_E)) {
+        gs->morpheus.shutup = true;
+        int srcfile = relevant_src_file_id_from_world_pos(&gs->map, gs->floppy.position);
+        char *filename = decode_fileid(srcfile);
+        try_open_text_editor(&gs->settings, filename);
     }
 
     if (IsKeyPressed('P')) settings->pause = !settings->pause;
     if (settings->pause)
         return;
 
-    if (IsKeyPressed(KEY_E)) {
-        int srcfile = relevant_src_file_id_from_world_pos(&gs->map, gs->floppy.position);
-        char *filename = decode_fileid(srcfile);
-        try_open_text_editor(&gs->settings, filename);
-    }
+    if (IsKeyPressed(KEY_K))
+        settings->gameOver = true;
 
-    if (IsKeyPressed(KEY_N) && settings->api_changed) {
-        printf("started it here\n");
+    if (IsKeyPressed('F') && settings->api_changed) {
         place_powerup(&gs->powerups, gs->floppy.position, ++settings->max_api_version);
-        printf("made it here\n");
         gs->settings.api_changed = false;
     }
 
@@ -199,7 +205,7 @@ void UpdateGame(game_state *gs)
     for (int i = 0; i < gs->powerups.nPowerups; i++) {
         Powerup *powerup = &gs->powerups.powerup[i];
         bool collided = CheckCollisionCircles(
-            gs->floppy.position, gs->floppy.radius, powerup->position, gs->powerups.radius);
+            gs->floppy.position, gs->floppy.radius, powerup->position, powerup_radius);
         if (collided) {
             gs->settings.api_version = powerup->api_version_id;
             break;
@@ -223,9 +229,9 @@ void DrawGame(game_state *gs)
         draw_intro_screen(&gs->intro);
         return;
     }
-    ClearBackground(get_color(COLOR_BACKGROUND));
 
     draw_background(gs->assets, gs->camera, gs->settings.api_version);
+    draw_secret_message(&gs->morpheus, gs->elapsed);
 
     char buf[256];
     snprintf(buf, 256, "api_version %d", gs->settings.api_version);
@@ -247,15 +253,23 @@ void DrawGame(game_state *gs)
     BeginMode2D(gs->camera);
 
     draw_map(&gs->map);
-    draw_powerups(&gs->powerups);
+
+    for (int i = 0; i < gs->powerups.nPowerups; i++) {
+        draw_powerup(gs->powerups.powerup[i]);
+    }
 
     {
         DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, get_color(COLOR_AVATAR));
-        if (gs->settings.api_changed)
-            DrawCircle(gs->floppy.position.x + 32.0, gs->floppy.position.y + 8.0, gs->powerups.radius, ORANGE);
+        if (gs->settings.api_changed) {
+            Powerup p = (Powerup){
+                .position = Vector2Add(gs->floppy.position, (Vector2){24, 10}),
+                .color = RED,
+            };
+            draw_powerup(p);
+        }
     }
 
     EndMode2D();

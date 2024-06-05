@@ -1,3 +1,10 @@
+#ifndef PALETTE_H
+#define PALETTE_H
+
+#include "raylib.h"
+
+#define N_BACKGROUND_PALETTES 5
+
 enum {
     COLOR_BACKGROUND,
     COLOR_AVATAR,
@@ -12,4 +19,7 @@ enum {
     COLOR_TUBE_RED,
 };
 
+extern const Color background_palette[N_BACKGROUND_PALETTES];
 Color get_color(int clr);
+
+#endif

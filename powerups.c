@@ -41,15 +41,14 @@ bool try_open_text_editor(Settings *settings, char *filename) {
 
     int pid = fork();
     if (pid == 0) {
-        struct termios orig_term;
-        tcgetattr(0, &orig_term);
+        // struct termios orig_term;
+        // tcgetattr(0, &orig_term);
         char buf[256];
         snprintf(buf, 256, "$EDITOR %s\n", filename);
-        system(buf);
-        // execlp(getenv("EDITOR"), getenv("EDITOR"), filename, NULL);
-        // perror("execlp");
-        // exit(1);
-        tcsetattr(0, TCSAFLUSH, &orig_term);
+        execlp(getenv("EDITOR"), getenv("EDITOR"), filename, NULL);
+        perror("execlp");
+        exit(1);
+        // tcsetattr(0, TCSAFLUSH, &orig_term);
     }
 
     return true;

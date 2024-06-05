@@ -166,6 +166,8 @@ Vector2 flip_y(Vector2 v) {
     return (Vector2){v.x, -v.y};
 }
 
+void update_camera(game_state *gs);
+
 void UpdateGame(game_state *gs)
 {
     if (gs->intro.running) {
@@ -216,7 +218,8 @@ void UpdateGame(game_state *gs)
     };
 
 
-    gs->camera.target.x = gs->floppy.position.x;
+    //gs->camera.target.x = gs->floppy.position.x;
+    update_camera(gs);
 
     // Check Pill Collisions
     for (int i = 0; i < gs->powerups.nPowerups; i++) {

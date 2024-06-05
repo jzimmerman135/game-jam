@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include "map.h"
-#include "api.h"
 #include "lib/cJSON/cJSON.h"
 #include "palette.h"
+#include <stdlib.h>
 
 static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
 {
@@ -169,4 +169,8 @@ void draw_map(Map *map) {
     for (int i = 0; i < map->nTubes; i++) {
         draw_tube(&map->tubes[i], map->visibility);
     }
+}
+
+src_file_id relevant_src_file_id_from_world_pos(const Map *map, Vector2 playerpos) {
+    return FIRST_FILE;
 }

@@ -4,6 +4,7 @@
 #include "raylib.h"
 
 #define MAX_TUBES 100
+#define MAX_POWERUPS 32
 
 enum {
     TUBE_NONE = 0,
@@ -19,6 +20,7 @@ typedef struct {
     bool pause;
     int api_version;
     int max_api_version;
+    bool api_changed; // either 0 or 1
 }  Settings;
 
 typedef struct Floppy {
@@ -40,5 +42,17 @@ typedef struct {
     int nTubes;
     int visibility;
 } Map;
+
+typedef struct {
+    Vector2 position;
+    Color color;
+    int api_version_id;
+} Powerup;
+
+typedef struct {
+    int radius;
+    int nPowerups;
+    Powerup powerup[MAX_POWERUPS];
+} Powerups;
 
 #endif

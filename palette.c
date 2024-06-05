@@ -1,6 +1,8 @@
 #include "raylib.h"
 #include "palette.h"
 
+/* cliteral? sounds frisky */
+
 const Color palette[] = {
     /* COLOR_BACKGROUND */
     CLITERAL(Color){0xFF, 0xFF, 0xBA, 0xFF},

@@ -5,9 +5,9 @@
 #include <stdlib.h>
 #include "raylib.h"
 #include "types.h"
+#include "powerups.h"
 
 #define GAME_STATE_SIZE 20
-#define LOAD_NEW_API (-1)
 
 typedef struct game_state game_state;
 
@@ -23,6 +23,9 @@ struct game_state {
     Camera2D camera;
     Floppy floppy;
     Map map;
+    Powerups powerups;
+
+    int debugvalue;
 
     float delta;
     float elapsed;
@@ -42,7 +45,7 @@ typedef struct {
   bool (*step)(game_state *state);
 
   int (*requested_api_version_id)(const game_state *state);
-  void (*set_api_version_id_callback)(game_state *state, int version_id);
+  void (*api_changed_callback)(game_state *state);
 
   const size_t game_state_size;
 } game_api;

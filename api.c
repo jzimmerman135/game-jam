@@ -110,9 +110,7 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
             int direction = how_did_it_collide(gs, tb);
             if (direction == 0) {
                 /* upper: snap to right above */
-                gs->floppy.position.y =
-                    tb->rec.y -
-                    gs->floppy.radius*1.1;
+                gs->floppy.position.y = tb->rec.y - gs->floppy.radius;
             }
         }
             break;
@@ -197,7 +195,7 @@ void UpdateGame(game_state *gs)
 
     gs->camera.target.x = gs->floppy.position.x;
 
-    // Check Collisions
+    // Check Pill Collisions
     for (int i = 0; i < gs->powerups.nPowerups; i++) {
         Powerup *powerup = &gs->powerups.powerup[i];
         bool collided = CheckCollisionCircles(
@@ -208,6 +206,7 @@ void UpdateGame(game_state *gs)
         }
     }
 
+    // Check Tube Collisions
     for (int i = 0; i < gs->map.nTubes; i++) {
         Tubes *tube = &gs->map.tubes[i];
         bool collided = CheckCollisionCircleRec(

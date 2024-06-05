@@ -35,7 +35,7 @@
         new_velocity.y = prev_velocity.y + jump_boost;
 
     // Clamp the velocity to the maximum upward velocity
-    new_velocity.y = max(new_velocity.y, max_upward_velocity);
+    new_velocity.y = min(new_velocity.y, max_upward_velocity);
 
     return new_velocity;
 }

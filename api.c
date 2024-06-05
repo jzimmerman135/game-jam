@@ -248,7 +248,6 @@ void DrawGame(game_state *gs)
     }
 
     draw_background(gs->assets, gs->camera, gs->settings.api_version);
-    draw_secret_message(&gs->morpheus, gs->elapsed);
 
     char buf[256];
     snprintf(buf, 256, "api_version %d", gs->settings.api_version);
@@ -290,6 +289,8 @@ void DrawGame(game_state *gs)
     }
 
     EndMode2D();
+
+    draw_secret_message(&gs->morpheus, gs->elapsed);
 }
 
 bool step(game_state *state) {

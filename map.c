@@ -44,7 +44,7 @@ void init_map(Map *m)
     int i;
     const char *mapFilePath;
 
-    mapFilePath = "proto/maps/02.json";
+    mapFilePath = "proto/maps/03.json";
     fp = fopen(mapFilePath, "r");
 
     if (fp == NULL) {

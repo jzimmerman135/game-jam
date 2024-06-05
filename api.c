@@ -14,6 +14,8 @@
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 
+#define FLOPPY_OUTERSCALE 1.3
+
 float clamp(float value, float min, float max)
 {
     return value < min ? min : value > max ? max : value;
@@ -110,6 +112,7 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
                 gs->floppy.position.y =
                     tb->rec.y -
                     gs->floppy.radius*1.1;
+                gs->floppy.velocity.y = 0;
             }
         }
             break;
@@ -133,6 +136,7 @@ void reset(game_state *game)
     game->settings.gameOver = false;
     game->settings.pause = false;
     game->settings.api_version = 0;
+    game->map.visibility = 0;
     game->floppy.position = floppy_initial_position;
     game->floppy.velocity = floppy_initial_velocity;
     game->camera = init_camera(game->floppy.position);
@@ -197,7 +201,7 @@ void UpdateGame(game_state *gs)
     for (int i = 0; i < gs->powerups.nPowerups; i++) {
         Powerup *powerup = &gs->powerups.powerup[i];
         bool collided = CheckCollisionCircles(
-            gs->floppy.position, gs->floppy.radius, powerup->position, gs->powerups.radius);
+            gs->floppy.position, gs->floppy.radius, powerup->position, gs->powerups.radius*FLOPPY_OUTERSCALE);
         if (collided) {
             gs->settings.api_version = powerup->api_version_id;
             break;
@@ -248,8 +252,8 @@ void DrawGame(game_state *gs)
     draw_powerups(&gs->powerups);
 
     {
-        DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
-        DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
+        DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*FLOPPY_OUTERSCALE, get_color(COLOR_TUBE_SHADOW));
+        DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*FLOPPY_OUTERSCALE, get_color(COLOR_AVATAR_BORDER2));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, get_color(COLOR_AVATAR));
         if (gs->settings.api_changed)

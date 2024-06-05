@@ -76,6 +76,7 @@ function barrier()
     return rect {
         ypos = 0,
         height = screen_height,
+        move = tube_width,
     }
 end
 
@@ -83,39 +84,66 @@ function add_rect(map, rect)
     table.insert(map.rects, rect)
 end
 
-
-map = {
-    rects = {
+function level0()
+    local map = {
+        rects = {
+        }
     }
-}
 
-t = upper_tube(screen_height_50 * 0.8)
-t.leftpad = screen_width * 0.5;
-add_rect(map, t)
-t = lower_tube(screen_height_50)
-t.move = tube_width*1.3;
-add_rect(map, t)
+    local t = {}
 
-t = platform(from_bottom(0.5), tube_width*4)
-t.move = tube_width*4
-add_rect(map, t)
+    t = upper_tube(screen_height_50 * 0.8)
+    t.leftpad = screen_width * 0.5;
+    add_rect(map, t)
+    t = lower_tube(screen_height_50)
+    t.move = tube_width*1.3;
+    add_rect(map, t)
 
-t = platform(from_bottom(0.25), tube_width*3)
-t.move = tube_width*3
-add_rect(map, t)
+    t = platform(from_bottom(0.6), tube_width*8)
+    t.move = tube_width*8
+    add_rect(map, t)
 
-t = platform(from_bottom(0.1), tube_width*3)
-t.move = tube_width*3.5
-add_rect(map, t)
+    t = platform(from_bottom(0.35), tube_width*6)
+    t.move = tube_width*6
+    add_rect(map, t)
 
-t = toggle(from_bottom(0.3))
-t.move = tube_width*2
-add_rect(map, t)
+    t = platform(from_bottom(0.2), tube_width*5)
+    t.move = tube_width*6.4
+    add_rect(map, t)
 
-t = barrier()
-t.types = rect_types.blue
-add_rect(map, t)
+    t = toggle(from_bottom(0.3))
+    t.move = tube_width*2
+    add_rect(map, t)
 
-fp = io.open("proto/maps/01.json", "w")
-fp:write(json.encode(map))
-fp:close()
+    t = barrier()
+    t.types = rect_types.blue
+    add_rect(map, t)
+
+    t = upper_tube(screen_height_50 * 0.8)
+    add_rect(map, t)
+    t = lower_tube(screen_height_50)
+    t.move = tube_width*4.0
+    add_rect(map, t)
+
+    t = upper_tube(screen_height_50 * 0.8)
+    t.move = tube_width*2.0
+    add_rect(map, t)
+    t = lower_tube(screen_height_50)
+    t.move = tube_width*2.0
+    add_rect(map, t)
+
+    -- create long road, more dinosaur
+    long_tube_size = tube_width*30
+    t = platform(from_bottom(0.1), long_tube_size)
+    t.move = tube_width*5
+    add_rect(map, t)
+    t = lower_tube(screen_height_50)
+    t.move = tube_width*2.0
+    add_rect(map, t)
+
+    fp = io.open("maps/01.json", "w")
+    fp:write(json.encode(map))
+    fp:close()
+end
+
+level0()

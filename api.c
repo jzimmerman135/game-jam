@@ -11,9 +11,13 @@
 #include "types.h"
 #include "intro.h"
 
+// cheat codes
+//#define ZOOMITOUT
 //#define GODMODE
+
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
+
 
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
@@ -50,10 +54,18 @@ const Vector2 camera_offset = { 200.0f, 0.0f };
 
 Camera2D init_camera(Vector2 floppy_position) {
     return (Camera2D){
+#ifndef ZOOMITOUT
         .offset = (Vector2){ 200.0f, 0 },
+#else
+        .offset = (Vector2){ 200.0f, 200.0 },
+#endif
         .target = (Vector2){ floppy_position.x, 0.0 },
         .rotation = 0.0f,
+#ifndef ZOOMITOUT
         .zoom = 1.0f,
+#else
+        .zoom = 0.2f,
+#endif
     };
 }
 
@@ -118,6 +130,7 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
             if (direction == 0) {
                 /* upper: snap to right above */
                 gs->floppy.position.y = tb->rec.y - gs->floppy.radius;
+                gs->floppy.velocity.y = 0;
             }
         }
             break;

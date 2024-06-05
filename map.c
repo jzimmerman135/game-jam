@@ -43,7 +43,7 @@ void init_map(Map *m)
     int i;
     const char *mapFilePath;
 
-    mapFilePath = "proto/maps/02.json";
+    mapFilePath = "proto/maps/03.json";
     fp = fopen(mapFilePath, "r");
 
     if (fp == NULL) {
@@ -118,17 +118,22 @@ static void draw_tube(Tubes *tb, int visibility)
                 );
             break;
         case TUBE_TOGGLE:
-            DrawRectangle(tb->rec.x + 8,
-                tb->rec.y + 8,
-                tb->rec.width,
-                tb->rec.height,
-                get_color(COLOR_TUBE_SHADOW)
-                );
-            DrawRectangle(tb->rec.x,
-                tb->rec.y,
-                tb->rec.width,
-                tb->rec.height,
-                get_color(COLOR_TUBE_TOGGLE)
+            //DrawRectangle(tb->rec.x + 8,
+            //    tb->rec.y + 8,
+            //    tb->rec.width,
+            //    tb->rec.height,
+            //    get_color(COLOR_TUBE_SHADOW)
+            //    );
+            //DrawRectangle(tb->rec.x,
+            //    tb->rec.y,
+            //    tb->rec.width,
+            //    tb->rec.height,
+            //    get_color(COLOR_TUBE_TOGGLE)
+            //    );
+            DrawCircle(tb->rec.x + tb->rec.width*0.5,
+                tb->rec.y + tb->rec.height*0.5,
+                tb->rec.width*0.8,
+                get_color(COLOR_TUBE_BLUE)
                 );
             break;
         case TUBE_BLUE:

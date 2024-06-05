@@ -10,6 +10,7 @@ typedef struct {
     Map map;
 } Leveleditor;
 
+Map read_level(const char *filename);
 bool save_level(Leveleditor *editor, const char *filename);
 bool update_leveleditor(Leveleditor *editor);
 void draw_leveleditor(Leveleditor *editor);

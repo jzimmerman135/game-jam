@@ -9,12 +9,13 @@ tube_width = 100
 square_size = 64
 square_ycenter = screen_height_50 - square_size*0.5
 
-types = {
-    death = 0,
-    surface = 1,
-    toggle = 2,
-    red = 3,
-    blue = 3,
+rect_types = {
+    none = 0,
+    death = 1,
+    platform = 2,
+    toggle = 3,
+    red = 4,
+    blue = 5,
 }
 
 function rect(p)
@@ -24,7 +25,7 @@ function rect(p)
         height = p.height or screen_height_25,
         move = p.move or tube_width * 3,
         leftpad = p.leftpad or 0,
-        type = types.death,
+        types = p.types or rect_types.death,
     }
 end
 
@@ -50,12 +51,20 @@ function square(ypos)
     }
 end
 
+function toggle(ypos)
+    local r = square(ypos)
+    r.types = rect_types.toggle
+
+    return r
+end
+
 function platform(ypos, length)
     return rect {
         ypos = ypos,
         width = length,
         height = square_size,
-        move = length + tube_width * 3
+        move = length + tube_width * 3,
+        types = rect_types.platform,
     }
 end
 
@@ -84,24 +93,27 @@ t = upper_tube(screen_height_50 * 0.8)
 t.leftpad = screen_width * 0.5;
 add_rect(map, t)
 t = lower_tube(screen_height_50)
+t.move = tube_width*1.3;
 add_rect(map, t)
 
-t = platform(from_bottom(0.75), tube_width*3)
-t.move = tube_width*3
-add_rect(map, t)
-
-t = platform(from_bottom(0.5), tube_width*3)
-t.move = tube_width*3
+t = platform(from_bottom(0.5), tube_width*4)
+t.move = tube_width*4
 add_rect(map, t)
 
 t = platform(from_bottom(0.25), tube_width*3)
+t.move = tube_width*3
+add_rect(map, t)
+
+t = platform(from_bottom(0.1), tube_width*3)
 t.move = tube_width*3.5
 add_rect(map, t)
 
-t = square(from_bottom(0.3))
+t = toggle(from_bottom(0.3))
+t.move = tube_width*2
 add_rect(map, t)
 
 t = barrier()
+t.types = rect_types.blue
 add_rect(map, t)
 
 fp = io.open("proto/maps/01.json", "w")

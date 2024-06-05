@@ -5,7 +5,7 @@ CFLAGS := -Wall -Wpedantic -g3 -I/opt/homebrew/include -fsanitize=address
 LDFLAGS := -L/opt/homebrew/lib
 LIBS := -lraylib
 
-OBJS = api.o map.o lib/cJSON/cJSON.o powerups.o
+OBJS = api.o map.o lib/cJSON/cJSON.o powerups.o jump.o
 
 all: game.out game_api.dylib
 

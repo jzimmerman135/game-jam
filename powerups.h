@@ -6,7 +6,6 @@
 #include <assert.h>
 
 typedef enum {
-   VERTICAL_MOVEMENT_SRC_FILE,
    FIRST_FILE,
 } src_file_id;
 

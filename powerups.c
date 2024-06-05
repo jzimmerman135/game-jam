@@ -28,7 +28,7 @@ void destroy_powerup(Powerups *powerups, int id) {
 char *decode_fileid(src_file_id fileid) {
     switch (fileid) {
         case FIRST_FILE:
-            return "api.c";
+            return "jump.c";
         default:
             return NULL;
     }
@@ -60,12 +60,12 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
 void draw_background(Assets assets, Camera2D camera, int api_version) {
     DrawTextureTiled(
         assets.textures[0],
-        (Rectangle){0, 0, 32, 30},
+        (Rectangle){ 0, 0, 32, 30 },
         (Rectangle){ 0, 0, 820, 600 },
         (Vector2){ fmodf(camera.target.x / 4.0, 32.0f), 0 },
         0.0,
         5.0,
-        ColorAlpha(get_color(COLOR_BACKGROUND), 0.05)
+        ColorAlpha(get_color(COLOR_BACKGROUND), 0.04)
     );
 }
 

@@ -7,6 +7,9 @@
 #define MAX_POWERUPS 32
 #define N_TEXTURES 5
 
+#define max(a, b) ((a) > (b) ? (a) : (b))
+#define min(a, b) ((a) < (b) ? (a) : (b))
+
 enum {
     TUBE_NONE = 0,
     TUBE_DEATH = 1,

@@ -60,4 +60,10 @@ typedef struct {
     Powerup powerup[MAX_POWERUPS];
 } Powerups;
 
+typedef struct {
+    Font ibmfont;
+    int running;
+    int pos;
+} Intro;
+
 #endif

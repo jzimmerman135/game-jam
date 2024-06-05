@@ -22,6 +22,8 @@ struct game_state {
 
     float delta;
     float elapsed;
+
+    Intro intro;
 };
 
 typedef struct {

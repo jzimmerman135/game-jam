@@ -7,6 +7,7 @@
 #include "powerups.h"
 #include "jump.h"
 #include "types.h"
+#include "intro.h"
 
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
@@ -80,6 +81,9 @@ void init(game_state *gs)
     Assets assets;
     assets.textures[0] = LoadTexture("bits.png");
 
+    Intro intro;
+    intro_setup(&intro);
+
     *gs = (game_state){
         .screen = screen,
         .settings = settings,
@@ -90,6 +94,7 @@ void init(game_state *gs)
         .elapsed = gs->elapsed,
         .powerups = powerups,
         .assets = assets,
+        .intro = intro
     };
 }
 
@@ -142,6 +147,10 @@ Vector2 flip_y(Vector2 v) {
 
 void UpdateGame(game_state *gs)
 {
+    if (gs->intro.running) {
+        intro_update(&gs->intro);
+        return;
+    }
     gs->delta = GetFrameTime();
     gs->elapsed = GetTime();
 
@@ -211,6 +220,10 @@ void UpdateGame(game_state *gs)
 
 void DrawGame(game_state *gs)
 {
+    if (gs->intro.running) {
+        draw_intro_screen(&gs->intro);
+        return;
+    }
     ClearBackground(get_color(COLOR_BACKGROUND));
 
     draw_background(gs->assets, gs->camera, gs->settings.api_version);

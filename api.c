@@ -135,6 +135,7 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
         }
             break;
         case TUBE_TOGGLE:
+            tb->toggled = 1;
             gs->map.visibility = 1;
             break;
         case TUBE_BLUE:

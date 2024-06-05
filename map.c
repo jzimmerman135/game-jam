@@ -31,6 +31,7 @@ static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     tb->rec.height = height->valuedouble;
     tb->color = (Color){0, 0, 0, 255};
     tb->type = floor(type->valuedouble);
+    tb->toggled = 0;
     *xpos += xoff;
 }
 
@@ -43,7 +44,7 @@ void init_map(Map *m)
     int i;
     const char *mapFilePath;
 
-    mapFilePath = "proto/maps/02.json";
+    mapFilePath = "proto/maps/03.json";
     fp = fopen(mapFilePath, "r");
 
     if (fp == NULL) {

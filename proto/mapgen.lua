@@ -217,19 +217,20 @@ function lvl2()
         }
     }
 
-    -- lvl2_tubefield(map)
+    lvl2_tubefield(map)
     t = rect {
         ypos = 0,
-        height = screen_height*0.5,
+        height = screen_height*0.35,
         width = 50 * tube_width,
         move = 0,
     }
+
+    t.leftpad = 200
 
     add_rect(map, t)
 
     t = platform(from_bottom(0.1), tube_width * 50);
     t.move = tube_width * 3.0
-    t.leftpad = 200
     add_rect(map, t)
 
 
@@ -311,14 +312,17 @@ function lvl3()
         {lower_tube, screen_height_50*(squeeze + 0.3), tube_width * 3},
     }
 
-    total_len = tube_width * 48
+    total_len = tube_width * (48 + 4)
 
     local top_barrier = rect {
         ypos = -screen_height_125*0.5,
-        width = total_len - tube_width*3,
+        --width = total_len - tube_width*3,
+        width = 4500,
         height = screen_height_125,
         move = 0,
     }
+
+    print(top_barrier.width)
 
     local bottom_barrier = rect {
         ypos = screen_height - screen_height_125*0.5,
@@ -330,24 +334,23 @@ function lvl3()
     add_rect(map, top_barrier)
     add_rect(map, bottom_barrier)
 
-
     tubestream(map, tubes, 0)
 
-    t = rect {
+    long_wall_1 = rect {
         ypos = -screen_height*4,
         width = tube_width,
         height = screen_height*4,
         leftpad = 0
     }
-    add_rect(map, t)
+    add_rect(map, long_wall_1)
 
-    t = rect {
+    long_wall_2 = rect {
         ypos = -screen_height*4,
         width = tube_width,
         height = screen_height*5,
-        leftpad = tube_width
+        leftpad = tube_width*4
     }
-    add_rect(map, t)
+    add_rect(map, long_wall_2)
     local fp = io.open("proto/maps/03.json", "w")
     fp:write(json.encode(map))
     fp:close()

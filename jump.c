@@ -26,9 +26,15 @@
     float gravity = -14.0;
     float jump_boost = 1000.0;
     float max_upward_velocity = 400.0;
+    float next_velocity_x = prev_velocity.x;
     Vector2 new_velocity;
 
-    new_velocity.x = prev_velocity.x;
+    // gravity=14;
+    // jump_boost=2000;
+    // max_upward_velocity=800;
+    // next_velocity_x = 0;
+    
+    new_velocity.x = next_velocity_x;
     new_velocity.y = prev_velocity.y + gravity;
 
     if (IsKeyPressed(KEY_SPACE))

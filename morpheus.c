@@ -77,9 +77,9 @@ void draw_secret_message(Morpheus *morpheus, float elapsed) {
     if (morpheus->shutup)
         return;
 
-    if (elapsed > 2.0 && morpheus->last_said <= 0) {
+    if (morpheus->last_said <= 0 && elapsed > 2.0) {
         DrawRectangle(0, 0, 200, 50, BLACK);
-        DrawText("Psst! Check your terminal", 0, 0, 30, GREEN);
+        // DrawText("Psst! Check your terminal", 0, 0, 30, GREEN);
         morpheus->statement_id = 0;
     }
 }

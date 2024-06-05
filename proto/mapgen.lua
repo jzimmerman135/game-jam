@@ -221,8 +221,11 @@ function lvl2()
     t = rect {
         ypos = 0,
         height = screen_height*0.5,
-        width = 50 * tube_width
+        width = 50 * tube_width,
+        move = 0,
     }
+
+    add_rect(map, t)
 
     t = platform(from_bottom(0.1), tube_width * 50);
     t.move = tube_width * 3.0
@@ -257,12 +260,6 @@ function lvl2()
     t.move = tube_width * 3
     add_rect(map, t)
 
-    -- t = upper_tube(screen_height_50 * 0.8)
-    -- t.leftpad = screen_width * 0.5;
-    -- add_rect(map, t)
-    -- t = lower_tube(screen_height_50)
-    -- t.move = tube_width*1.3;
-    -- add_rect(map, t)
 
     local fp = io.open("proto/maps/02.json", "w")
     fp:write(json.encode(map))

@@ -37,8 +37,10 @@ void close(void)
 }
 
 const Vector2 floppy_initial_position = { 0, 300 };
-const Vector2 floppy_initial_velocity = { 100.0f, 0.0f };
+const Vector2 floppy_initial_velocity = { 400.0f, 0.0f };
 const Vector2 camera_offset = { 200.0f, 0.0f };
+#define GRAVITY 800.0
+#define JUMP_VELOCITY -500.0
 
 Camera2D init_camera(Vector2 floppy_position) {
     return (Camera2D){
@@ -174,7 +176,7 @@ void UpdateGame(game_state *gs)
         gs->settings.api_changed = false;
     }
 
-    float gravity = 400.0;
+    float gravity = GRAVITY;
     gs->floppy.velocity.y += gravity*gs->delta;
 
     gs->floppy.position = (Vector2){
@@ -185,7 +187,8 @@ void UpdateGame(game_state *gs)
     if (IsKeyPressed(KEY_SPACE)) {
         // TODO: CONFIGURE NICE JUMP KINEMATICS
         //gs->floppy.velocity.y = max(gs->floppy.velocity.y - 400., -300);
-        gs->floppy.velocity.y = max(gs->floppy.velocity.y - 1000., -300);
+        //gs->floppy.velocity.y = max(gs->floppy.velocity.y - 400., -300);
+        gs->floppy.velocity.y = JUMP_VELOCITY;
     }
 
     gs->camera.target.x = gs->floppy.position.x;

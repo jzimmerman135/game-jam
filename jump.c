@@ -21,7 +21,8 @@
  *
  * -------------------------------------------------------------------
  */
-Vector2 floppy_velocity(bool did_jump, Vector2 prev_velocity, float delta_time) {
+ Vector2 update_floppy_velocity(Vector2 prev_velocity, float delta_time, bool did_jump)
+ {
     float gravity = -14.0;
     float jump_boost = 1000.0;
     float max_upward_velocity = 400.0;

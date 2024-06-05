@@ -175,8 +175,9 @@ void UpdateGame(game_state *gs)
     }
 
 
+    // Positive real velocity unintuitively goes downward, so we abstract this away to user
     gs->floppy.velocity = flip_y(gs->floppy.velocity);
-    gs->floppy.velocity = floppy_velocity(IsKeyPressed(KEY_SPACE), gs->floppy.velocity, gs->delta);
+    gs->floppy.velocity = update_floppy_velocity(gs->floppy.velocity, gs->delta, IsKeyPressed(KEY_SPACE));
     gs->floppy.velocity = flip_y(gs->floppy.velocity);
 
     gs->floppy.position = (Vector2){

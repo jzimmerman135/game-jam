@@ -67,6 +67,8 @@ void update_morpheus(Morpheus *morpheus)
                 printf("You'll see a pill in the game, take it with 'F'\n");
                 morpheus->last_said = morpheus->statement_id;
                 break;
+            case 4:
+                morpheus->shutup = true;
             default:
                 break;
         }
@@ -77,12 +79,14 @@ void draw_secret_message(Morpheus *morpheus, float elapsed) {
     if (morpheus->shutup)
         return;
 
-    if (morpheus->last_said <= 0 && elapsed > 2.0) {
+    if (morpheus->statement_id == 0) {
         const char *msg ="Psst! Hit P and Check your terminal!"; 
         int padding = 10;
         Color fgcolor = (Color){0x4e, 0xDc, 0x4e, 0xff};
         DrawRectangle(0, 0, MeasureText(msg, 30) + padding*2, 30 + padding*2, BLACK);
         DrawText(msg, padding, padding, 30, fgcolor);
         morpheus->statement_id = 0;
+        DrawRectangle(0, 0, 200, 50, BLACK);
+        DrawText("Psst! Check your terminal", 0, 0, 30, GREEN);
     }
 }

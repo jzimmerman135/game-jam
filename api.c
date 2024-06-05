@@ -76,7 +76,7 @@ void init(game_state *gs)
     Morpheus morpheus = {
         .last_said = -1,
         .shutup = false,
-        .statement_id = 0,
+        .statement_id = -1,
     };
 
     Settings settings = {
@@ -197,6 +197,11 @@ void UpdateGame(game_state *gs)
     if (IsKeyPressed('P')) settings->pause = !settings->pause;
     if (settings->pause)
         return;
+
+    bool start_secret_message = IsKeyPressed(KEY_S);
+    if (start_secret_message) {
+        gs->morpheus.statement_id = 0;
+    }
 
     if (IsKeyPressed(KEY_K))
         settings->gameOver = true;

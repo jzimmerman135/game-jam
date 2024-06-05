@@ -5,14 +5,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "powerups.h"
+#include "jump.h"
 #include "types.h"
 #include "intro.h"
 
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
 
+#ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
+#endif
+#ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
+#endif
 
 float clamp(float value, float min, float max)
 {
@@ -136,6 +141,10 @@ void reset(game_state *game)
     game->camera = init_camera(game->floppy.position);
 }
 
+Vector2 flip_y(Vector2 v) {
+    return (Vector2){v.x, -v.y};
+}
+
 void UpdateGame(game_state *gs)
 {
     if (gs->intro.running) {
@@ -174,19 +183,17 @@ void UpdateGame(game_state *gs)
         gs->settings.api_changed = false;
     }
 
-    float gravity = 400.0;
-    gs->floppy.velocity.y += gravity*gs->delta;
+
+    // Positive real velocity unintuitively goes downward, so we abstract this away to user
+    gs->floppy.velocity = flip_y(gs->floppy.velocity);
+    gs->floppy.velocity = update_floppy_velocity(gs->floppy.velocity, gs->delta, IsKeyPressed(KEY_SPACE));
+    gs->floppy.velocity = flip_y(gs->floppy.velocity);
 
     gs->floppy.position = (Vector2){
         gs->floppy.position.x + gs->floppy.velocity.x * gs->delta,
         gs->floppy.position.y + gs->floppy.velocity.y * gs->delta
     };
 
-    if (IsKeyPressed(KEY_SPACE)) {
-        // TODO: CONFIGURE NICE JUMP KINEMATICS
-        //gs->floppy.velocity.y = max(gs->floppy.velocity.y - 400., -300);
-        gs->floppy.velocity.y = max(gs->floppy.velocity.y - 1000., -300);
-    }
 
     gs->camera.target.x = gs->floppy.position.x;
 
@@ -219,6 +226,8 @@ void DrawGame(game_state *gs)
     }
     ClearBackground(get_color(COLOR_BACKGROUND));
 
+    draw_background(gs->assets, gs->camera, gs->settings.api_version);
+
     char buf[256];
     snprintf(buf, 256, "api_version %d", gs->settings.api_version);
     DrawText(buf, 0, 0, 20, gs->settings.api_changed ? BLUE : RED);
@@ -235,9 +244,6 @@ void DrawGame(game_state *gs)
                 gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
                 gs->screen.y / 2.0 - 40, 40, RED);
     }
-
-
-    draw_background(gs->assets, gs->camera, gs->settings.api_version);
 
     BeginMode2D(gs->camera);
 

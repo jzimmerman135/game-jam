@@ -12,9 +12,6 @@
 typedef struct game_state game_state;
 
 struct game_state {
-    int screenWidth;
-    int screenHeight;
-
     Settings settings;
     Vector2 screen;
     Camera2D camera;

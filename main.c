@@ -5,8 +5,6 @@
 #include <assert.h>
 #include <dlfcn.h>
 #include <string.h>
-#include <sys/_types/_ino_t.h>
-#include <sys/_types/_ssize_t.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 
@@ -89,8 +87,29 @@ void clean_up_apis(api_manager *manager) {
     }
 }
 
+#include <dirent.h>
+
+void delete_files_with_prefix(const char *directory, const char *prefix) {
+    struct dirent *entry;
+    DIR *dp = opendir(directory);
+    if (dp == NULL) {
+        perror("opendir");
+        return;
+    }
+    while ((entry = readdir(dp))) {
+        if (entry->d_type != DT_REG || strncmp(entry->d_name, prefix, strlen(prefix)))
+            continue;
+        char filepath[1024];
+        snprintf(filepath, sizeof(filepath), "%s/%s", directory, entry->d_name);
+        remove(filepath) ? perror("remove") : (void)printf("Deleted: %s\n", filepath);
+    }
+   closedir(dp);
+}
+
 int main(void) {
     api_manager api_manager = {0};
+
+    delete_files_with_prefix(".", ".game_api_V");
 
     struct stat api_attr;
     assert(stat(API_PATH, &api_attr) == 0);

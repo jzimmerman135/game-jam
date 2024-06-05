@@ -25,11 +25,9 @@ typedef struct {
 
 typedef struct {
     int curr_version_id;
-    int n_dylibs;
+    int n_versions;
     api_instance *versions;
 } api_manager;
-
-char space[1000 * 1000];
 
 void mktempcpy(const char origpath[], char newpath[], size_t size, ssize_t pathlen) {
     strncpy(newpath, TMP_API_PATH, sizeof(TMP_API_PATH));
@@ -53,23 +51,23 @@ void mktempcpy(const char origpath[], char newpath[], size_t size, ssize_t pathl
     fclose(tmp_api_fp);
 }
 
+// if api_version == manger->n_versions, then a new version is created
 const game_api *use_api(api_manager *manager, struct stat api_attr, int api_version)
 {
-    if (api_version >= manager->n_dylibs + 1 || api_version < 0) {
-        fprintf(stderr, "api_version[%d] invalid with n_dylibs[%d]\n", api_version, manager->n_dylibs);
+    if (api_version >= manager->n_versions + 1 || api_version < 0) {
+        fprintf(stderr, "api_version[%d] invalid with n_dylibs[%d]\n", api_version, manager->n_versions);
         exit(1);
     }
 
-    assert(stat(API_PATH, &api_attr) == 0);
-
-    if (api_version < manager->n_dylibs) {
+    if (api_version < manager->n_versions) {
         manager->curr_version_id = api_version;
         return manager->versions[manager->curr_version_id].api;
     }
 
-    manager->curr_version_id = manager->n_dylibs++;
-    manager->versions = realloc(manager->versions, sizeof(manager->versions[0]) * manager->n_dylibs);
+    manager->curr_version_id = manager->n_versions++;
+    manager->versions = realloc(manager->versions, sizeof(manager->versions[0]) * manager->n_versions);
 
+    assert(stat(API_PATH, &api_attr) == 0);
     api_instance *new_api_version = &manager->versions[manager->curr_version_id];
     mktempcpy(API_PATH, new_api_version->path, api_attr.st_size, sizeof(API_PATH));
 
@@ -85,7 +83,7 @@ const game_api *use_api(api_manager *manager, struct stat api_attr, int api_vers
 }
 
 void clean_up_apis(api_manager *manager) {
-    for (int i = 0; i < manager->n_dylibs; i++) {
+    for (int i = 0; i < manager->n_versions; i++) {
         dlclose(manager->versions[i].handle);
         remove(manager->versions[i].path);
     }
@@ -107,9 +105,8 @@ int main(void) {
     api->init(game_state);
 
     int i = 0;
-
     do {
-        // check for a fresh api dylib every 10 frames
+        // throttle check for a fresh api dylib every 10 frames
         if (i++ % 10 == 0) {
             ino_t prev_ino = api_attr.st_ino;
             assert(stat(API_PATH, &api_attr) == 0);
@@ -120,7 +117,6 @@ int main(void) {
 
         int requested_api_version = api->requested_api_version_id(game_state);
         if (api_manager.curr_version_id != requested_api_version) {
-            printf("changin api version to %d from %d\n", requested_api_version, api_manager.curr_version_id);
             int old_game_state_size = api->game_state_size;
             api = use_api(&api_manager, api_attr, requested_api_version);
             if (old_game_state_size != api->game_state_size) {

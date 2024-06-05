@@ -72,34 +72,25 @@ void init(game_state *gs)
     Powerups powerups = {0};
     powerups.radius = 10;
 
+    Assets assets;
+    assets.textures[0] = LoadTexture("bits.png");
+
     *gs = (game_state){
         .screen = screen,
         .settings = settings,
         .floppy = floppy,
         .camera = camera,
-        .superfx = false,
-        .score = 0,
         .map = map,
-        .hiScore = 0,
         .delta = 0.0,
         .elapsed = gs->elapsed,
-        .debugvalue = 0,
         .powerups = powerups,
+        .assets = assets,
     };
 }
 
-<<<<<<< paul
 static int how_did_it_collide(game_state *gs, Tubes *tb) {
     // TODO: implement
-
     return 0;
-}
-
-static void game_over(game_state *gs)
-{
-    Settings *settings = &gs->settings;
-    settings->gameOver = true;
-    settings->pause = false;
 }
 
 void handle_tube_collision(game_state *gs, Tubes *tb)
@@ -107,7 +98,6 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
     switch (tb->type) {
         case TUBE_PLATFORM: {
             int direction = how_did_it_collide(gs, tb);
-
             if (direction == 0) {
                 /* upper: snap to right above */
                 gs->floppy.position.y =
@@ -120,17 +110,17 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
             gs->map.visibility = 1;
             break;
         case TUBE_BLUE:
-            if (gs->map.visibility == 0) {
-                game_over(gs);
-            }
-            break;
+            if (gs->map.visibility != 0)
+                break;
         case TUBE_DEATH:
         default: {
-            game_over(gs);
+            gs->settings.gameOver = true;
+            gs->settings.pause = true;
             break;
         }
     }
-=======
+}
+
 void reset(game_state *game)
 {
     game->settings.gameOver = false;
@@ -139,7 +129,6 @@ void reset(game_state *game)
     game->floppy.position = floppy_initial_position;
     game->floppy.velocity = floppy_initial_velocity;
     game->camera = init_camera(game->floppy.position);
->>>>>>> main
 }
 
 void UpdateGame(game_state *gs)
@@ -203,15 +192,11 @@ void UpdateGame(game_state *gs)
         }
     }
 
-    for (int i = 0; i < gs->map.nTubes; i++)
-    {
+    for (int i = 0; i < gs->map.nTubes; i++) {
         Tubes *tube = &gs->map.tubes[i];
         bool collided = CheckCollisionCircleRec(
             gs->floppy.position, gs->floppy.radius, tube->rec);
         if (collided) {
-            // settings->gameOver = true;
-            // settings->pause = false;
-            // break;
             handle_tube_collision(gs, tube);
         }
     }
@@ -238,6 +223,8 @@ void DrawGame(game_state *gs)
                 gs->screen.y / 2.0 - 40, 40, RED);
     }
 
+
+    draw_background(gs->assets, gs->camera, gs->settings.api_version);
 
     BeginMode2D(gs->camera);
 

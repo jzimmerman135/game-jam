@@ -5,6 +5,7 @@
 
 #define MAX_TUBES 100
 #define MAX_POWERUPS 32
+#define N_TEXTURES 5
 
 enum {
     TUBE_NONE = 0,
@@ -42,6 +43,10 @@ typedef struct {
     int nTubes;
     int visibility;
 } Map;
+
+typedef struct {
+    Texture2D textures[N_TEXTURES];
+} Assets;
 
 typedef struct {
     Vector2 position;

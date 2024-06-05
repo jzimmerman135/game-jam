@@ -15,22 +15,16 @@ struct game_state {
     int screenWidth;
     int screenHeight;
 
-    int score;
-    int hiScore;
-
     Settings settings;
     Vector2 screen;
     Camera2D camera;
     Floppy floppy;
     Map map;
     Powerups powerups;
-
-    int debugvalue;
+    Assets assets;
 
     float delta;
     float elapsed;
-
-    bool superfx;
 };
 
 typedef struct {

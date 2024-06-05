@@ -18,4 +18,6 @@ bool try_open_text_editor(char *filename);
 
 void draw_powerups(Powerups *powerups);
 
+void draw_background(Assets assets, Camera2D camera, int api_version);
+
 #endif

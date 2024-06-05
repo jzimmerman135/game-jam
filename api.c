@@ -39,7 +39,7 @@ void close(void)
 const Vector2 floppy_initial_position = { 0, 300 };
 const Vector2 floppy_initial_velocity = { 400.0f, 0.0f };
 const Vector2 camera_offset = { 200.0f, 0.0f };
-#define GRAVITY 800.0
+#define GRAVITY 1400.0
 #define JUMP_VELOCITY -500.0
 
 Camera2D init_camera(Vector2 floppy_position) {

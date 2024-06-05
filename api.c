@@ -48,12 +48,10 @@ const Vector2 camera_offset = { 200.0f, 0.0f };
 
 Camera2D init_camera(Vector2 floppy_position) {
     return (Camera2D){
-        //.offset = (Vector2){ 200.0f, 0 },
-        .offset = (Vector2){ 200.0f, 200 },
+        .offset = (Vector2){ 200.0f, 0 },
         .target = (Vector2){ floppy_position.x, 0.0 },
         .rotation = 0.0f,
-        //.zoom = 1.0f,
-        .zoom = 0.5f,
+        .zoom = 1.0f,
     };
 }
 

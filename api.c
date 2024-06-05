@@ -164,7 +164,7 @@ void UpdateGame(game_state *gs)
     if (IsKeyPressed(KEY_E)) {
         int srcfile = relevant_src_file_id_from_world_pos(&gs->map, gs->floppy.position);
         char *filename = decode_fileid(srcfile);
-        try_open_text_editor(filename);
+        try_open_text_editor(&gs->settings, filename);
     }
 
     if (IsKeyPressed(KEY_N) && settings->api_changed) {

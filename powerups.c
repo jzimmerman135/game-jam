@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "palette.h"
+#include <termios.h>
 
 void place_powerup(Powerups *powerups, Vector2 pos, int id) {
     if (powerups->nPowerups > MAX_POWERUPS) {
@@ -34,15 +35,21 @@ char *decode_fileid(src_file_id fileid) {
     }
 }
 
-bool try_open_text_editor(char *filename) {
+bool try_open_text_editor(Settings *settings, char *filename) {
     if (filename == NULL)
         return true;
 
     int pid = fork();
     if (pid == 0) {
-        execlp(getenv("EDITOR"), getenv("EDITOR"), filename, NULL);
-        perror("execlp");
-        exit(1);
+        struct termios orig_term;
+        tcgetattr(0, &orig_term);
+        char buf[256];
+        snprintf(buf, 256, "$EDITOR %s\n", filename);
+        system(buf);
+        // execlp(getenv("EDITOR"), getenv("EDITOR"), filename, NULL);
+        // perror("execlp");
+        // exit(1);
+        tcsetattr(0, TCSAFLUSH, &orig_term);
     }
 
     return true;

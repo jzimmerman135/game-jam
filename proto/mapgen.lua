@@ -225,7 +225,7 @@ function lvl2()
         move = 0,
     }
 
-    t.leftpad = 200
+    t.leftpad = tube_width*0.75
 
     add_rect(map, t)
 
@@ -247,17 +247,17 @@ function lvl2()
     t.move = tube_width * 10.0
     add_rect(map, t)
 
-    t = lower_tube(screen_height*0.5)
+    t = lower_tube(screen_height*0.4)
     t.move = tube_width * 8.0
     add_rect(map, t)
 
-    t = lower_tube(screen_height*0.2)
+    t = lower_tube(screen_height*0.4)
     t.move = tube_width * 3
     add_rect(map, t)
     t = lower_tube(screen_height*0.2)
     t.move = tube_width * 3
     add_rect(map, t)
-    t = lower_tube(screen_height*0.2)
+    t = lower_tube(screen_height*0.35)
     t.move = tube_width * 3
     add_rect(map, t)
 

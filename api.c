@@ -53,6 +53,11 @@ const Vector2 floppy_initial_position = { 0, 300 };
 const Vector2 floppy_initial_velocity = { 400.0f, 0.0f };
 const Vector2 camera_offset = { 200.0f, 0.0f };
 
+const Checkpoint initial_checkpoint = {
+    .position = { 0, 300 },
+    .api_version = 0,
+};
+
 Camera2D init_camera(Vector2 floppy_position) {
     return (Camera2D){
 #ifndef ZOOMITOUT
@@ -119,7 +124,7 @@ void init(game_state *gs)
         .assets = assets,
         .intro = intro,
         .morpheus = morpheus,
-        .last_checkpoint = floppy_initial_position,
+        .last_checkpoint = initial_checkpoint,
     };
 }
 
@@ -166,11 +171,11 @@ void reset(game_state *game)
     game->map.scale = (Vector2){1.0, 1.0};
     game->settings.gameOver = false;
     game->settings.pause = false;
-    game->settings.api_version = 0;
     game->floppy.position = floppy_initial_position;
     game->floppy.velocity = floppy_initial_velocity;
     game->camera = init_camera(game->floppy.position);
-    game->floppy.position = game->last_checkpoint;
+    game->settings.api_version = game->last_checkpoint.api_version;
+    game->floppy.position = game->last_checkpoint.position;
 }
 
 Vector2 flip_y(Vector2 v) {
@@ -181,22 +186,24 @@ void update_camera(game_state *gs);
 
 void UpdateGame(game_state *gs)
 {
+    Settings *settings = &gs->settings;
+
     if (gs->intro.running) {
         intro_update(&gs->intro);
         return;
     }
 
-    if (gs->settings.win) {
-        gs->settings.win = false;
-        gs->settings.level++;
+    if (settings->win) {
+        settings->win = false;
+        settings->level++;
 
-        if (gs->settings.level >= NLEVELS) {
-            gs->settings.level = NLEVELS;
-            gs->settings.win = true;
+        if (settings->level >= NLEVELS) {
+            settings->level = NLEVELS;
+            settings->win = true;
             return;
         } else {
-            init_map(&gs->map, gs->settings.level);
-            gs->last_checkpoint = floppy_initial_position;
+            init_map(&gs->map, settings->level);
+            gs->last_checkpoint = (Checkpoint){.position = floppy_initial_position, .api_version = settings->api_version};
             reset(gs);
         }
     }
@@ -207,11 +214,10 @@ void UpdateGame(game_state *gs)
     gs->elapsed = GetTime();
     update_morpheus(&gs->morpheus);
 
-    Settings *settings = &gs->settings;
 
     if (IsKeyPressed(KEY_K)) { // kill switch
         settings->gameOver = true;
-        gs->last_checkpoint = floppy_initial_position;
+        gs->last_checkpoint = initial_checkpoint;
     }
 
     if (settings->gameOver) {
@@ -228,8 +234,8 @@ void UpdateGame(game_state *gs)
     }
 
     if (IsKeyPressed('C')) {
-        gs->last_checkpoint = gs->floppy.position;
-        printf("saved checkpoint\n");
+        gs->last_checkpoint.position = gs->floppy.position;
+        gs->last_checkpoint.api_version = gs->settings.api_version;
     }
 
     if (IsKeyPressed('P'))
@@ -354,12 +360,9 @@ void DrawGame(game_state *gs)
         DrawRectangle(x - 11, y - 11, textlen + 22, 40 + 22, BLACK);
         DrawRectangle(x - 5, y - 5, textlen + 20, 40 + 20, get_color(COLOR_TUBE_SHADOW));
         DrawRectangle(x - 10, y - 10, textlen + 20, 40 + 20, get_color(COLOR_AVATAR));
-        DrawText("PRESS [ENTER] TO PLAY AGAIN", x, y, 40, get_color(COLOR_TUBE_SHADOW));
-        DrawText("PRESS [ENTER] TO PLAY AGAIN", x - 2, y - 2, 40, WHITE);
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", x + 4, y + 4, 40, get_color(COLOR_TUBE_SHADOW));
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", x, y, 40, WHITE);
     } else if (gs->settings.pause) {
-        // DrawText("GAME PAUSED",
-        //         gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
-        //         gs->screen.y / 2.0 - 40, 40, RED);
         Vector2 xy1 = {gs->screen.x / 2. - 80., gs->screen.y / 2. - 75.};
         Vector2 xy2 = {gs->screen.x / 2. + 20., gs->screen.y / 2. - 75.};
         Vector2 wh = { 50., 150.};

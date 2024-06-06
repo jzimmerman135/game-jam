@@ -76,4 +76,9 @@ typedef struct {
     int pos;
 } Intro;
 
+typedef struct {
+    int api_version;
+    Vector2 position;
+} Checkpoint;
+
 #endif

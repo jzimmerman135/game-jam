@@ -253,7 +253,7 @@ void DrawGame(game_state *gs)
         return;
     }
 
-    draw_background(gs->assets, gs->camera, gs->settings.api_version);
+    draw_background(gs->assets, gs->camera, gs->settings.api_version, gs->map.scale);
 
     char buf[256];
     snprintf(buf, 256, "api_version %d", gs->settings.api_version);

@@ -63,9 +63,9 @@ void draw_powerup(Powerup p)
     DrawEllipse(p.position.x - 6, p.position.y - 5, 20.0 / 4., powerup_radius / 4., ColorAlpha(WHITE, 0.5));
 }
 
-void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint);
+void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Vector2 scale, Color tint);
 
-void draw_background(Assets assets, Camera2D camera, int api_version) {
+void draw_background(Assets assets, Camera2D camera, int api_version, Vector2 mapscale) {
     Color backgroundcol = background_palette[api_version % N_BACKGROUND_PALETTES];
     ClearBackground(backgroundcol);
     DrawTextureTiled(
@@ -74,7 +74,7 @@ void draw_background(Assets assets, Camera2D camera, int api_version) {
         (Rectangle){ 0, 0, 820, 600 },
         (Vector2){ fmodf(camera.target.x / 4.0, 32.0f), 0 },
         0.0,
-        5.0,
+        Vector2Scale(mapscale, 5.0),
         ColorAlpha(background_palette[api_version], 0.04)
     );
 }
@@ -82,12 +82,12 @@ void draw_background(Assets assets, Camera2D camera, int api_version) {
 
 // Draw part of a texture (defined by a rectangle) with rotation and scale tiled into dest.
 // Code taken from raylib/examples/textures/texture_tiling.c
-void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, float scale, Color tint)
+void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Vector2 scale, Color tint)
 {
-    if ((texture.id <= 0) || (scale <= 0.0f)) return;  // Wanna see a infinite loop?!...just delete this line!
+    if ((texture.id <= 0) || (scale.x <= 0.0f)) return;  // Wanna see a infinite loop?!...just delete this line!
     if ((source.width == 0) || (source.height == 0)) return;
 
-    int tileWidth = (int)(source.width*scale), tileHeight = (int)(source.height*scale);
+    int tileWidth = (int)(source.width * scale.x), tileHeight = (int)(source.height * scale.y);
     if ((dest.width < tileWidth) && (dest.height < tileHeight))
     {
         // Can fit only one tile

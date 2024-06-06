@@ -19,6 +19,6 @@ bool try_open_text_editor(Settings *settings, char *filename);
 
 void draw_powerup(Powerup p);
 
-void draw_background(Assets assets, Camera2D camera, int api_version);
+void draw_background(Assets assets, Camera2D camera, int api_version, Vector2 mapscale);
 
 #endif

@@ -6,7 +6,7 @@
 #include "types.h"
 #include "powerups.h"
 
-void init_map(Map *map);
+void init_map(Map *m, int level);
 void draw_map(Map *map, Vector2 origin);
 
 Rectangle transform_rec(Rectangle r, Vector2 scale, Vector2 origin);

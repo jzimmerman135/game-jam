@@ -361,10 +361,20 @@ function lvl3()
         ypos = -screen_height*4,
         width = tube_width,
         height = screen_height*5,
-        leftpad = tube_width*4
+        leftpad = tube_width*4,
+        move = 0,
     }
 
     add_rect(map, long_wall_2)
+
+    for i=1,14 do
+        local t = toggle(-screen_height * 4 + i*tube_width*2)
+        t.width = tube_width
+        t.height = tube_width
+        t.move = 0
+        add_rect(map, t)
+    end
+
     local fp = io.open("proto/maps/03.json", "w")
     fp:write(json.encode(map))
     fp:close()

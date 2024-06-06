@@ -86,6 +86,8 @@ void init(game_state *gs)
         .gameOver = false,
         .pause = false,
         .win = false,
+        .level = 0,
+        .new_level = false,
     };
 
     Floppy floppy = (Floppy){
@@ -97,7 +99,7 @@ void init(game_state *gs)
 
     Camera2D camera = init_camera(floppy.position);
     Map map;
-    init_map(&map);
+    init_map(&map, 0);
 
     Assets assets;
     assets.textures[0] = LoadTexture("bits.png");
@@ -183,6 +185,18 @@ void UpdateGame(game_state *gs)
         intro_update(&gs->intro);
         return;
     }
+
+    //if (gs->settings.win) {
+    //    gs->settings.win = false;
+    //    gs->settings.level++;
+    //    
+    //    if (gs->settings.level >= NLEVELS) {
+    //        gs->settings.level = NLEVELS;
+    //        gs->settings.win = true;
+    //        return;
+    //    } else {
+    //    }
+    //}
 
     if (gs->settings.win) return;
 

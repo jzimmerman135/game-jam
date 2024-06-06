@@ -38,7 +38,12 @@ static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
     *xpos += xoff;
 }
 
-void init_map(Map *m)
+static const char *level_files[] = {
+   "proto/maps/03.json",
+   "proto/maps/04.json",
+};
+
+void init_map(Map *m, int level)
 {
     cJSON *json;
     char *str;
@@ -47,7 +52,7 @@ void init_map(Map *m)
     int i;
     const char *mapFilePath;
 
-    mapFilePath = "proto/maps/03.json";
+    mapFilePath = level_files[level];
     fp = fopen(mapFilePath, "r");
 
     if (fp == NULL) {

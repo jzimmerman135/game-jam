@@ -6,6 +6,7 @@
 #define MAX_TUBES 100
 #define MAX_POWERUPS 32
 #define N_TEXTURES 5
+#define NLEVELS 2
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -27,6 +28,8 @@ typedef struct {
     int max_api_version;
     bool api_changed; // either 0 or 1
     bool win;
+    int level;
+    bool new_level;
 }  Settings;
 
 typedef struct Floppy {

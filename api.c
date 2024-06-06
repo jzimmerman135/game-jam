@@ -48,14 +48,22 @@ void open(void)
         if (WindowShouldClose())
             return;
 
-        ClearBackground(background_palette[0]);
+        ClearBackground(get_color(COLOR_AVATAR));
         float h = GetScreenHeight();
         float w = GetScreenWidth();
         Vector2 ctr = (Vector2){w * 0.25, h * 0.25};
-        DrawRectangleV(ctr, (Vector2){w * 0.5, h * 0.5}, get_color(COLOR_AVATAR));
-        DrawText("THE FLAPTRIX", ctr.x / 2. + 4, ctr.y + 4, 100, BLACK);
-        DrawText("THE FLAPTRIX", ctr.x / 2., ctr.y, 100, WHITE);
-        DrawText("Press SPACE to start", 10, ctr.y * 3.0, 20, WHITE);
+        DrawText("THE", ctr.x / 2. + 4, ctr.y + 4, 100, get_color(COLOR_TUBE_SHADOW));
+        DrawText("THE", ctr.x / 2., ctr.y, 100, WHITE);
+        DrawText("FLAPTRIX", ctr.x / 2. + 4, ctr.y + 4 + 80, 100, get_color(COLOR_TUBE_SHADOW));
+        DrawText("FLAPTRIX", ctr.x / 2., ctr.y + 80, 100, WHITE);
+        DrawText("Press SPACE to start", ctr.x + 180, ctr.y * 2.2, 20, GRAY);
+
+        DrawText("Controls:", ctr.x - 100 + 2, ctr.y * 2.9 + 2, 20, get_color(COLOR_TUBE_SHADOW));
+        DrawText("Controls:", ctr.x - 100, ctr.y * 2.9, 20, WHITE);
+        DrawText("'SPACE' to jump", ctr.x - 100, ctr.y * 3.1, 20, GRAY);
+        DrawText("'P' to pause", ctr.x - 100, ctr.y * 3.3, 20, GRAY);
+        DrawText("'C' to set checkpoint", ctr.x - 100, ctr.y * 3.5, 20, GRAY);
+
         EndDrawing();
     }
 

@@ -17,6 +17,7 @@ enum {
     TUBE_TOGGLE = 3,
     TUBE_RED = 4,
     TUBE_BLUE = 5,
+    TUBE_WINNER = 6,
 };
 
 typedef struct {
@@ -25,6 +26,7 @@ typedef struct {
     int api_version;
     int max_api_version;
     bool api_changed; // either 0 or 1
+    bool win;
 }  Settings;
 
 typedef struct Floppy {

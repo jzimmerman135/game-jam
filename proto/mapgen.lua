@@ -16,6 +16,7 @@ rect_types = {
     toggle = 3,
     red = 4,
     blue = 5,
+    winning = 6,
 }
 
 function rect(p)
@@ -340,9 +341,21 @@ function lvl3()
         ypos = -screen_height*4,
         width = tube_width,
         height = screen_height*4,
-        leftpad = 0
+        leftpad = 0,
+        move = 0,
     }
+
     add_rect(map, long_wall_1)
+
+    winning_block = rect {
+        ypos = -screen_height*4,
+        width = tube_width * 7,
+        height = screen_width_25,
+        leftpad = tube_width,
+        types = rect_types.winning
+    }
+    
+    add_rect(map, winning_block)
 
     long_wall_2 = rect {
         ypos = -screen_height*4,
@@ -350,6 +363,7 @@ function lvl3()
         height = screen_height*5,
         leftpad = tube_width*4
     }
+
     add_rect(map, long_wall_2)
     local fp = io.open("proto/maps/03.json", "w")
     fp:write(json.encode(map))

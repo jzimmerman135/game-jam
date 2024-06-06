@@ -116,6 +116,8 @@ Rectangle mkshadow(Rectangle r) {
     };
 }
 
+double color_phs = 0;
+
 static void draw_tube(Tubes *tb, Vector2 scale, Vector2 origin, int visibility)
 {
     Rectangle rec = transform_rec(tb->rec, scale, origin);
@@ -139,6 +141,29 @@ static void draw_tube(Tubes *tb, Vector2 scale, Vector2 origin, int visibility)
                 DrawRectangleRec(shadowrec, get_color(COLOR_TUBE_SHADOW));
                 DrawRectangleRec(rec, get_color(COLOR_TUBE_BLUE));
             }
+            break;
+        case TUBE_WINNER: {
+            Color c[2];
+            Color out;
+            double a;
+            a = sin(2.0 * M_PI * color_phs);
+            a += 1.0;
+            a *= 0.5;
+
+            c[0] = get_color(COLOR_TUBE_WINNER1);
+            c[1] = get_color(COLOR_TUBE_WINNER2);
+            
+            color_phs += GetFrameTime()*2;
+            color_phs = fmod(color_phs, 1.0);
+
+            out.r = (1.0 - a)*c[0].r + a*c[1].r;
+            out.g = (1.0 - a)*c[0].g + a*c[1].g;
+            out.b = (1.0 - a)*c[0].b + a*c[1].b;
+            out.a = 0xff;
+
+            DrawRectangleRec(shadowrec, get_color(COLOR_TUBE_SHADOW));
+            DrawRectangleRec(rec, out);
+          }
             break;
         default:
             DrawRectangleRec(shadowrec, get_color(COLOR_TUBE_SHADOW));

@@ -18,13 +18,14 @@
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
 
-
 #ifndef max
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #endif
 #ifndef min
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #endif
+
+static void draw_win(game_state *gs);
 
 float clamp(float value, float min, float max)
 {
@@ -57,14 +58,14 @@ Camera2D init_camera(Vector2 floppy_position) {
 #ifndef ZOOMITOUT
         .offset = (Vector2){ 200.0f, 0 },
 #else
-        .offset = (Vector2){ 200.0f, 200.0 },
+        .offset = (Vector2){ 200.0f, 300.0 },
 #endif
         .target = (Vector2){ floppy_position.x, 0.0 },
         .rotation = 0.0f,
 #ifndef ZOOMITOUT
         .zoom = 1.0f,
 #else
-        .zoom = 0.2f,
+        .zoom = 0.1f,
 #endif
     };
 }
@@ -84,6 +85,7 @@ void init(game_state *gs)
         .max_api_version = 0,
         .gameOver = false,
         .pause = false,
+        .win = false,
     };
 
     Floppy floppy = (Floppy){
@@ -141,6 +143,9 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
         case TUBE_BLUE:
             if (gs->map.visibility != 0)
                 break;
+        case TUBE_WINNER:
+            gs->settings.win = true;
+                break;
         case TUBE_DEATH:
         default: {
 #ifndef GODMODE
@@ -175,6 +180,8 @@ void UpdateGame(game_state *gs)
         intro_update(&gs->intro);
         return;
     }
+
+    if (gs->settings.win) return;
 
     gs->delta = GetFrameTime();
     gs->elapsed = GetTime();
@@ -250,6 +257,11 @@ void DrawGame(game_state *gs)
 {
     if (gs->intro.running) {
         draw_intro_screen(&gs->intro);
+        return;
+    }
+
+    if (gs->settings.win) {
+        draw_win(gs);
         return;
     }
 
@@ -340,3 +352,20 @@ const game_api shared_obj_api = {
     .game_state_size = sizeof(game_state),
     .api_changed_callback = set_api_changed,
 };
+
+static void draw_win(game_state *gs)
+{
+    Color bgcolor = (Color){0xff, 0x69, 0xb4, 0xff};
+    const char *msg = "You Win!!1!";
+    double center_x, center_y;
+    double sz;
+
+    sz = 60.0;
+
+    center_y = (gs->screen.y * 0.5) - (sz * 0.5);
+    center_x = (gs->screen.x * 0.5);
+    ClearBackground(bgcolor);
+    Color fgcolor = (Color){0x4e, 0xDc, 0x4e, 0xff};
+    center_x -= MeasureText(msg, sz)*0.5;
+    DrawText(msg, center_x, center_y, sz, fgcolor);
+}

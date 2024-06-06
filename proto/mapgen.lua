@@ -411,9 +411,19 @@ function lvl4()
     }
 
     add_rect(map, top_barrier)
+
+    local winner = rect {
+        ypos = 0,
+        width = tube_width,
+        height = screen_height,
+        move = 0,
+        types = rect_types.winning,
+    }
+
     add_rect(map, bottom_barrier)
 
     tubestream(map, tubes, screen_width*0.5)
+    add_rect(map, winner)
 
     local fp = io.open("proto/maps/04.json", "w")
     fp:write(json.encode(map))

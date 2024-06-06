@@ -1,4 +1,5 @@
 #include "morpheus.h"
+#include "morpheus_intro.txt.h"
 #include "raylib.h"
 #include <stdio.h>
 #include <termios.h>
@@ -6,8 +7,8 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-const char cowpheus[] = "\n\n\nmorpheus: moo! (hit any key)";
-const char bluepill[] = "bluepill";
+const char redpill[] = "\nThis game is a digital prison to silo unsafe programmers, but I've hacked in\n"
+"and I can help you escape.";
 
 void set_nonblocking_mode(int enable) {
     struct termios ttystate;
@@ -51,23 +52,40 @@ void update_morpheus(Morpheus *morpheus)
     if (morpheus->last_said < morpheus->statement_id) {
         switch (morpheus->statement_id) {
             case 0:
-                printf("%s\n", cowpheus);
-                printf("hit any key to continue\n");
+                printf("\33[0;100");
+                printf("\33[0;32m");
+                fwrite(morpheus_intro_txt, 1, morpheus_intro_txt_len, stdout);
+                printf("Crtl-c to take the \33[0;34mblue pill\n");
+                printf("\33[0;32m");
+                printf("Hit any key to take the \33[0;31mred pill\n");
+                printf("\33[0m");
                 morpheus->last_said = morpheus->statement_id;
                 break;
             case 1:
-                printf("%s\n", bluepill);
-                printf("respond to continue\n");
+                printf("\33[0;100");
+                printf("\33[0;32m");
+                printf("%s\n", redpill);
+                printf("\33[0m");
+                printf("\33[0;36mrespond to continue\n");
                 morpheus->last_said = morpheus->statement_id;
                 break;
             case 2:
-                printf("I've added some secret controls -- THESE ARE FUCKIN IMPORTANT READ 'EM\n");
-                printf("Hit 'E' to open the source code\n");
+                printf("\33[0;100");
+                printf("\33[0;32m");
+                printf("Very good\n");
+                printf("I've added some secret controls -- \33[0;31mTHESE ARE IMPORTANT, READ 'EM\n");
+                printf("\33[0m");
+                printf("\33[0;100");
+                printf("\33[0;34m");
+                printf("===============================================\n");
+                printf("Inside the game, hit 'E' to open the source code\n");
                 printf("When you've finished recompile with 'make'\n");
                 printf("You'll see a pill in the game, take it with 'F'\n");
+                printf("===============================================\n");
+                printf("\33[0m");
                 morpheus->last_said = morpheus->statement_id;
                 break;
-            case 4:
+            case 3:
                 morpheus->shutup = true;
             default:
                 break;
@@ -80,7 +98,7 @@ void draw_secret_message(Morpheus *morpheus, float elapsed) {
         return;
 
     if (morpheus->statement_id == 0) {
-        const char *msg ="Psst! Hit P and Check your terminal!"; 
+        const char *msg ="Psst! Hit P and Check your terminal!";
         int padding = 10;
         Color fgcolor = (Color){0x4e, 0xDc, 0x4e, 0xff};
         DrawRectangle(0, 0, MeasureText(msg, 30) + padding*2, 30 + padding*2, BLACK);

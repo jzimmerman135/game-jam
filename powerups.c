@@ -12,13 +12,24 @@
 
 const float powerup_radius = 10.0;
 
+const Color powerup_palette[] = {
+    PURPLE,
+    RED,
+    GREEN,
+    BLUE,
+    ORANGE,
+    LIME,
+};
+
+const int N_POWERUP_PALETTES = sizeof(powerup_palette) / sizeof(Color);
+
 void place_powerup(Powerups *powerups, Vector2 pos, int id) {
     if (powerups->nPowerups > MAX_POWERUPS) {
         powerups->powerup[0] = powerups->powerup[--powerups->nPowerups];
     }
     powerups->powerup[powerups->nPowerups].position = pos;
     powerups->powerup[powerups->nPowerups].api_version_id = id;
-    powerups->powerup[powerups->nPowerups].color = RED;
+    powerups->powerup[powerups->nPowerups].color = powerup_palette[id % N_POWERUP_PALETTES];
     powerups->nPowerups++;
 }
 
@@ -74,7 +85,7 @@ void draw_background(Assets assets, Camera2D camera, int api_version, Vector2 ma
         (Vector2){ fmodf(camera.target.x / 4.0, 32.0f), 0 },
         0.0,
         Vector2Scale(mapscale, 5.0),
-        ColorAlpha(background_palette[api_version], 0.04)
+        ColorAlpha(background_palette[api_version % N_BACKGROUND_PALETTES], 0.04)
     );
 }
 

@@ -23,4 +23,7 @@ void draw_background(Assets assets, Camera2D camera, int api_version, Vector2 ma
 
 Vector2 scale_by(Vector2 pt, Vector2 scale, Vector2 origin);
 
+extern const Color powerup_palette[];
+extern const int N_POWERUP_PALETTES;
+
 #endif

@@ -11,6 +11,7 @@
 #include "types.h"
 #include "intro.h"
 
+#define DEATH_BOUNDARY 4908.29
 // cheat codes
 //#define ZOOMITOUT
 //#define GODMODE
@@ -188,6 +189,10 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
             gs->settings.gameOver = true;
             gs->settings.pause = true;
             gs->n_deaths_total++;
+
+            if (gs->floppy.position.x >= DEATH_BOUNDARY) {
+                gs->morpheus.fleo_is_ready = true;
+            }
 #endif
             break;
         }
@@ -272,7 +277,13 @@ void UpdateGame(game_state *gs)
     if (settings->pause)
         return;
 
-    bool start_secret_message = gs->morpheus.last_said == -1 && gs->n_deaths_total > 1 && gs->elapsed >= 20.0;
+    bool start_secret_message =
+        gs->morpheus.last_said == -1 &&
+        gs->n_deaths_total >= 1 &&
+        // gs->elapsed >= 20.0 &&
+        gs->morpheus.fleo_is_ready &&
+        gs->floppy.position.x > 300.0;
+
     if (start_secret_message) {
         gs->morpheus.statement_id = 0;
     }
@@ -348,9 +359,9 @@ void DrawGame(game_state *gs)
 
     draw_background(gs->assets, gs->camera, gs->settings.api_version, gs->map.scale);
 
-    char buf[256];
-    snprintf(buf, 256, "api_version %d", gs->settings.api_version);
-    DrawText(buf, 0, 0, 20, gs->settings.api_changed ? BLUE : RED);
+    // char buf[256];
+    // snprintf(buf, 256, "api_version %d", gs->settings.api_version);
+    // DrawText(buf, 0, 0, 20, gs->settings.api_changed ? BLUE : RED);
 
     BeginMode2D(gs->camera);
 
@@ -401,6 +412,10 @@ void DrawGame(game_state *gs)
         DrawRectangleV(Vector2Add(xy2, offset), Vector2Add(wh, offset), BLACK);
         DrawRectangleV(xy2, wh, WHITE);
     }
+
+    // char strbuf[256];
+    // sprintf(strbuf, "floppyx: %g\n", gs->floppy.position.x);
+    // DrawText(strbuf, 0, gs->screen.y - 40.0, 40, BLACK);
 }
 
 bool step(game_state *state) {

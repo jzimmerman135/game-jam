@@ -285,11 +285,11 @@ function lvl3()
         {upper_tube, screen_height_50*(squeeze - 0.3), tube_width*3},
         {lower_tube, screen_height_50*(squeeze + 0.4), tube_width * 4},
 
-        {upper_tube, screen_height_50*(squeeze + 0.5), 0},
+        {upper_tube, screen_height_50*(squeeze + 0.2), 0},
         {lower_tube, screen_height_50*(squeeze - 0.5), tube_width * 3},
 
-        {upper_tube, screen_height_50*(squeeze + 0.7), 0},
-        {lower_tube, screen_height_50*(squeeze - 0.7), tube_width * 3},
+        {upper_tube, screen_height_50*(squeeze + 0.4), 0},
+        {lower_tube, screen_height_50*(squeeze - 0.6), tube_width * 3},
 
         {upper_tube, screen_height_50*(squeeze - 0.1), 0},
         {lower_tube, screen_height_50*(squeeze + 0.1), tube_width * 3},

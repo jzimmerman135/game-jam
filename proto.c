@@ -210,13 +210,8 @@ void DrawGame(game_state *gs)
             // }
 
             //DrawText(TextFormat("xoff: %i", gs->xOffset), 20, 20, 40, GRAY);
-            // DrawText(TextFormat("HI-SCORE: %04i", gs->hiScore), 20, 70, 20, LIGHTGRAY);
 
-            if (gs->pause) {
-                DrawText("GAME PAUSED",
-                        gs->screenWidth/2 - MeasureText("GAME PAUSED", 40)/2,
-                        gs->screenHeight/2 - 40, 40, GRAY);
-            }
+
         } else {
             DrawText("PRESS [ENTER] TO PLAY AGAIN",
                     GetScreenWidth()/2 - MeasureText("PRESS [ENTER] TO PLAY AGAIN", 20)/2,

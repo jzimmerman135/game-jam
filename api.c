@@ -189,7 +189,7 @@ void UpdateGame(game_state *gs)
     if (gs->settings.win) {
         gs->settings.win = false;
         gs->settings.level++;
-        
+
         if (gs->settings.level >= NLEVELS) {
             gs->settings.level = NLEVELS;
             gs->settings.win = true;
@@ -318,21 +318,6 @@ void DrawGame(game_state *gs)
     snprintf(buf, 256, "api_version %d", gs->settings.api_version);
     DrawText(buf, 0, 0, 20, gs->settings.api_changed ? BLUE : RED);
 
-    if (gs->settings.gameOver) {
-        float textlen = (float)MeasureText("PRESS [ENTER] TO PLAY AGAIN", 40);
-        float x = gs->screen.x / 2.0 - textlen / 2.0;
-        float y = gs->screen.y / 2.0 - 40;
-        DrawRectangle(x - 11, y - 11, textlen + 22, 40 + 22, BLACK);
-        DrawRectangle(x - 5, y - 5, textlen + 20, 40 + 20, get_color(COLOR_TUBE_SHADOW));
-        DrawRectangle(x - 10, y - 10, textlen + 20, 40 + 20, get_color(COLOR_AVATAR));
-        DrawText("PRESS [ENTER] TO PLAY AGAIN", x, y, 40, get_color(COLOR_TUBE_SHADOW));
-        DrawText("PRESS [ENTER] TO PLAY AGAIN", x - 2, y - 2, 40, WHITE);
-    } else if (gs->settings.pause) {
-        DrawText("GAME PAUSED",
-                gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
-                gs->screen.y / 2.0 - 40, 40, RED);
-    }
-
     BeginMode2D(gs->camera);
 
     Vector2 origin = (Vector2){gs->floppy.position.x, gs->floppy.position.y};
@@ -361,6 +346,30 @@ void DrawGame(game_state *gs)
     EndMode2D();
 
     draw_secret_message(&gs->morpheus, gs->elapsed);
+
+    if (gs->settings.gameOver) {
+        float textlen = (float)MeasureText("PRESS [ENTER] TO PLAY AGAIN", 40);
+        float x = gs->screen.x / 2.0 - textlen / 2.0;
+        float y = gs->screen.y / 2.0 - 40;
+        DrawRectangle(x - 11, y - 11, textlen + 22, 40 + 22, BLACK);
+        DrawRectangle(x - 5, y - 5, textlen + 20, 40 + 20, get_color(COLOR_TUBE_SHADOW));
+        DrawRectangle(x - 10, y - 10, textlen + 20, 40 + 20, get_color(COLOR_AVATAR));
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", x, y, 40, get_color(COLOR_TUBE_SHADOW));
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", x - 2, y - 2, 40, WHITE);
+    } else if (gs->settings.pause) {
+        // DrawText("GAME PAUSED",
+        //         gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
+        //         gs->screen.y / 2.0 - 40, 40, RED);
+        Vector2 xy1 = {gs->screen.x / 2. - 80., gs->screen.y / 2. - 75.};
+        Vector2 xy2 = {gs->screen.x / 2. + 20., gs->screen.y / 2. - 75.};
+        Vector2 wh = { 50., 150.};
+        Vector2 offset = { 5, 5 };
+        DrawRectangleV(Vector2Scale(gs->screen, 0.25), Vector2Scale(gs->screen, 0.5), ColorAlpha(GRAY, 0.6));
+        DrawRectangleV(Vector2Add(xy1, offset), Vector2Add(wh, offset), BLACK);
+        DrawRectangleV(xy1, wh, WHITE);
+        DrawRectangleV(Vector2Add(xy2, offset), Vector2Add(wh, offset), BLACK);
+        DrawRectangleV(xy2, wh, WHITE);
+    }
 }
 
 bool step(game_state *state) {

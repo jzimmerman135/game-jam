@@ -99,11 +99,18 @@ void draw_secret_message(Morpheus *morpheus, float elapsed) {
         return;
 
     if (morpheus->statement_id == 0) {
-        const char *msg ="Psst! Hit P and Check your terminal!";
+        const char *msg ="Psst! Hit P and check the terminal!";
         int padding = 10;
-        Color fgcolor = (Color){0x4e, 0xDc, 0x4e, 0xff};
-        DrawRectangle(0, 0, MeasureText(msg, 30) + padding*2, 30 + padding*2, BLACK);
-        DrawText(msg, padding, padding, 30, fgcolor);
+        Color fgcolor = (Color){0x4e, 0xDc, 0x4e, 0xee};
+        Rectangle rect = {padding, padding, MeasureText(msg, 30) + padding*2, 30 + padding*2};
+
+        // Triangle
+        Vector2 lb = {0, 40 + padding * 2};
+        Vector2 rb = {padding * 3, 40 + padding * 2};
+        Vector2 rt = {padding * 1.5, 30 + padding * 2 };
+        DrawTriangle(lb, rb, rt, ColorAlpha(DARKGRAY, 1.0));
+        DrawRectangleRounded(rect, 20.0, 15, ColorAlpha(DARKGRAY, 1.0));
+        DrawText(msg, padding * 2, padding * 2, 30, fgcolor);
         morpheus->statement_id = 0;
     }
 }

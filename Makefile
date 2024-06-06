@@ -7,7 +7,7 @@ LIBS := -lraylib
 
 OBJS := api.o map.o lib/cJSON/cJSON.o powerups.o intro.o
 OBJS += palette.o jump.o morpheus.o
-ASSETS=intro.txt.h prophecy.txt.h flapflap.txt.h
+ASSETS=intro.txt.h prophecy.txt.h flapflap.txt.h morpheus_intro.txt.h
 
 all: $(ASSETS) game.out game_api.dylib
 

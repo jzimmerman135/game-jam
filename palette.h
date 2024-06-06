@@ -17,6 +17,8 @@ enum {
     COLOR_TUBE_TOGGLE,
     COLOR_TUBE_BLUE,
     COLOR_TUBE_RED,
+    COLOR_TUBE_WINNER1,
+    COLOR_TUBE_WINNER2,
 };
 
 extern const Color background_palette[N_BACKGROUND_PALETTES];

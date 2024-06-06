@@ -16,6 +16,7 @@ rect_types = {
     toggle = 3,
     red = 4,
     blue = 5,
+    winning = 6,
 }
 
 function rect(p)
@@ -340,9 +341,21 @@ function lvl3()
         ypos = -screen_height*4,
         width = tube_width,
         height = screen_height*4,
-        leftpad = 0
+        leftpad = 0,
+        move = 0,
     }
+
     add_rect(map, long_wall_1)
+
+    winning_block = rect {
+        ypos = -screen_height*4,
+        width = tube_width * 7,
+        height = screen_width_25,
+        leftpad = tube_width,
+        types = rect_types.winning
+    }
+    
+    add_rect(map, winning_block)
 
     long_wall_2 = rect {
         ypos = -screen_height*4,
@@ -350,8 +363,69 @@ function lvl3()
         height = screen_height*5,
         leftpad = tube_width*4
     }
+
     add_rect(map, long_wall_2)
     local fp = io.open("proto/maps/03.json", "w")
+    fp:write(json.encode(map))
+    fp:close()
+end
+
+function lvl4()
+    local map = {
+        rects = {
+        }
+    }
+
+    squeeze = 0.9
+    local tubes = {
+        {upper_tube, screen_height*0.5, tube_width*1.7},
+        {lower_tube, screen_height*0.5, tube_width*3.0},
+
+        {upper_tube, screen_height*0.5, tube_width*1.7},
+        {lower_tube, screen_height*0.5, tube_width*3.0},
+
+        {upper_tube, screen_height*0.5, tube_width*1.7},
+        {lower_tube, screen_height*0.5, tube_width*3.0},
+
+        {upper_tube, screen_height*0.5, tube_width*3},
+        {upper_tube, screen_height*0.4, tube_width*3},
+        {lower_tube, screen_height*0.5, tube_width*3},
+        {lower_tube, screen_height*0.55, tube_width*3},
+    }
+
+    total_len = tube_width * (48 + 4)
+
+    local top_barrier = rect {
+        ypos = -screen_height_125*0.5,
+        --width = total_len - tube_width*3,
+        width = 4500,
+        height = screen_height_125,
+        move = 0,
+    }
+
+    local bottom_barrier = rect {
+        ypos = screen_height - screen_height_125*0.5,
+        width = total_len,
+        height = screen_height_125,
+        move = 0
+    }
+
+    add_rect(map, top_barrier)
+
+    local winner = rect {
+        ypos = 0,
+        width = tube_width,
+        height = screen_height,
+        move = 0,
+        types = rect_types.winning,
+    }
+
+    add_rect(map, bottom_barrier)
+
+    tubestream(map, tubes, screen_width*0.5)
+    add_rect(map, winner)
+
+    local fp = io.open("proto/maps/04.json", "w")
     fp:write(json.encode(map))
     fp:close()
 end
@@ -359,3 +433,4 @@ end
 lvl1()
 lvl2()
 lvl3()
+lvl4()

@@ -276,8 +276,8 @@ function lvl3()
 
     squeeze = 0.6
     local tubes = {
-        {upper_tube, screen_height_50 * 0.5, tube_width*2},
-        {lower_tube, screen_height_50, tube_width * 2},
+        {upper_tube, screen_height_50 * 0.5, tube_width*4},
+        {lower_tube, screen_height_50*0.4, tube_width * 2},
 
         {upper_tube, screen_height_50*(squeeze - 0.3), tube_width*3},
         {lower_tube, screen_height_50*(squeeze + 0.3), tube_width * 3},
@@ -318,7 +318,7 @@ function lvl3()
     local top_barrier = rect {
         ypos = -screen_height_125*0.5,
         --width = total_len - tube_width*3,
-        width = 4500,
+        width = 4600 + tube_width,
         height = screen_height_125,
         move = 0,
     }
@@ -327,7 +327,7 @@ function lvl3()
 
     local bottom_barrier = rect {
         ypos = screen_height - screen_height_125*0.5,
-        width = total_len,
+        width = total_len + tube_width*3,
         height = screen_height_125,
         move = 0
     }
@@ -354,7 +354,7 @@ function lvl3()
         leftpad = tube_width,
         types = rect_types.winning
     }
-    
+
     add_rect(map, winning_block)
 
     long_wall_2 = rect {
@@ -368,7 +368,7 @@ function lvl3()
     add_rect(map, long_wall_2)
 
     for i=1,14 do
-        local t = toggle(-screen_height * 4 + i*tube_width*2)
+        local t = square(-screen_height * 4 + i*tube_width*2)
         t.width = tube_width
         t.height = tube_width
         t.move = 0

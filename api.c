@@ -13,7 +13,7 @@
 
 // cheat codes
 //#define ZOOMITOUT
-///#define GODMODE
+//#define GODMODE
 
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80

@@ -1,4 +1,5 @@
 #include "powerups.h"
+#include "map.h"
 #include "raylib.h"
 #include "types.h"
 #include <math.h>
@@ -44,23 +45,21 @@ bool try_open_text_editor(Settings *settings, char *filename) {
 
     int pid = fork();
     if (pid == 0) {
-        // struct termios orig_term;
-        // tcgetattr(0, &orig_term);
         char buf[256];
         snprintf(buf, 256, "$EDITOR %s\n", filename);
         execlp(getenv("EDITOR"), getenv("EDITOR"), filename, NULL);
         perror("execlp");
         exit(1);
-        // tcsetattr(0, TCSAFLUSH, &orig_term);
     }
 
     return true;
 }
 
-void draw_powerup(Powerup p)
+void draw_powerup(Powerup p, Vector2 mapscale, Vector2 origin)
 {
-    DrawEllipse(p.position.x, p.position.y, 20.0, powerup_radius, p.color);
-    DrawEllipse(p.position.x - 6, p.position.y - 5, 20.0 / 4., powerup_radius / 4., ColorAlpha(WHITE, 0.5));
+    Vector2 pos = scale_by(p.position, mapscale, origin);
+    DrawEllipse(pos.x, pos.y, 20.0, powerup_radius, p.color);
+    DrawEllipse(pos.x - 6, pos.y - 5, 20.0 / 4., powerup_radius / 4., ColorAlpha(WHITE, 0.5));
 }
 
 void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vector2 origin, float rotation, Vector2 scale, Color tint);
@@ -163,4 +162,9 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
             }
         }
     }
+}
+
+Vector2 scale_by(Vector2 pt, Vector2 scale, Vector2 origin) {
+    Vector2 movedpt = Vector2Subtract(pt, origin);
+    return Vector2Add(Vector2Multiply(movedpt, scale), origin);
 }

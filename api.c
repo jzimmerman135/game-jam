@@ -13,7 +13,7 @@
 
 // cheat codes
 //#define ZOOMITOUT
-//#define GODMODE
+///#define GODMODE
 
 #define FLOPPY_RADIUS 24
 #define TUBES_WIDTH 80
@@ -184,13 +184,19 @@ void UpdateGame(game_state *gs)
         return;
     }
 
-    if (gs->settings.win) return;
+    if (gs->settings.win)
+        return;
 
     gs->delta = GetFrameTime();
     gs->elapsed = GetTime();
     update_morpheus(&gs->morpheus);
 
     Settings *settings = &gs->settings;
+
+    if (IsKeyPressed(KEY_K)) { // kill switch
+        settings->gameOver = true;
+        gs->last_checkpoint = floppy_initial_position;
+    }
 
     if (settings->gameOver) {
         if (IsKeyPressed(KEY_ENTER))
@@ -210,21 +216,15 @@ void UpdateGame(game_state *gs)
         printf("saved checkpoint\n");
     }
 
-
     if (IsKeyPressed('P'))
         settings->pause = !settings->pause;
 
     if (settings->pause)
         return;
 
-    bool start_secret_message = IsKeyPressed(KEY_S);
+    bool start_secret_message = gs->morpheus.last_said == -1 && gs->elapsed >= 10.0;
     if (start_secret_message) {
         gs->morpheus.statement_id = 0;
-    }
-
-    if (IsKeyPressed(KEY_K)) {
-        settings->gameOver = true;
-        gs->last_checkpoint = floppy_initial_position;
     }
 
     if (IsKeyPressed('D'))
@@ -252,10 +252,14 @@ void UpdateGame(game_state *gs)
         Powerup *powerup = &gs->powerups.powerup[i];
         bool collided = CheckCollisionCircles(
             gs->floppy.position, gs->floppy.radius, powerup->position, powerup_radius);
-        if (collided) {
+        if (!collided)
+            continue;
+        if (!gs->floppy.is_bulldozin) {
             gs->settings.api_version = powerup->api_version_id;
-            break;
+        } else {
+            destroy_powerup(&gs->powerups, powerup->api_version_id);
         }
+        break;
     }
 
     // Check Tube Collisions
@@ -267,6 +271,17 @@ void UpdateGame(game_state *gs)
             handle_tube_collision(gs, tube);
         }
     }
+
+    // warp space
+    if (IsKeyDown(KEY_RIGHT)) {
+        gs->map.scale.x += (3.0 - gs->map.scale.x) * 0.08;
+        gs->floppy.velocity.x += (floppy_initial_velocity.x / 3.0 - gs->floppy.velocity.x) * 0.08;
+    }
+    else {
+        gs->map.scale.x += (1.0 - gs->map.scale.x) * 0.05;
+        gs->floppy.velocity.x += (floppy_initial_velocity.x - gs->floppy.velocity.x) * 0.05;
+    }
+
 }
 
 void DrawGame(game_state *gs)
@@ -304,24 +319,17 @@ void DrawGame(game_state *gs)
 
     BeginMode2D(gs->camera);
 
-    if (IsKeyDown(KEY_RIGHT)) {
-        gs->map.scale.x += (3.0 - gs->map.scale.x) * 0.08;
-        gs->floppy.velocity.x += (floppy_initial_velocity.x / 3.0 - gs->floppy.velocity.x) * 0.08;
-    }
-    else {
-        gs->map.scale.x += (1.0 - gs->map.scale.x) * 0.05;
-        gs->floppy.velocity.x += (floppy_initial_velocity.x - gs->floppy.velocity.x) * 0.05;
-    }
-
     Vector2 origin = (Vector2){gs->floppy.position.x, gs->floppy.position.y};
     draw_map(&gs->map, origin);
 
     for (int i = 0; i < gs->powerups.nPowerups; i++) {
-        draw_powerup(gs->powerups.powerup[i]);
+        draw_powerup(gs->powerups.powerup[i], gs->map.scale, gs->floppy.position);
     }
 
     { // draw floppy
         DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
+        if (gs->floppy.is_bulldozin)
+            DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.5, ColorAlpha(RED, 0.4));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.3, get_color(COLOR_AVATAR_BORDER2));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius*1.2, get_color(COLOR_AVATAR_BORDER1));
         DrawCircle(gs->floppy.position.x, gs->floppy.position.y, gs->floppy.radius, get_color(COLOR_AVATAR));
@@ -330,7 +338,7 @@ void DrawGame(game_state *gs)
                 .position = Vector2Add(gs->floppy.position, (Vector2){24, 10}),
                 .color = RED,
             };
-            draw_powerup(p);
+            draw_powerup(p, (Vector2){1.0, 1.0}, gs->floppy.position);
         }
     }
 

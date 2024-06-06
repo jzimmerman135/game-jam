@@ -81,6 +81,7 @@ void update_morpheus(Morpheus *morpheus)
                 printf("Inside the game, hit 'E' to open the source code\n");
                 printf("When you've finished recompile with 'make'\n");
                 printf("You'll see a pill in the game, take it with 'F'\n");
+                printf("Remove pills from the board by toggling 'D'\n");
                 printf("===============================================\n");
                 printf("\33[0m");
                 morpheus->last_said = morpheus->statement_id;

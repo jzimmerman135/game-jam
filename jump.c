@@ -55,13 +55,13 @@ void update_camera(game_state *gs)
 }
 
 
-const float X_SCALE_TRANSFORM = 1.0;
 
 // Defined externally
 extern const Vector2 floppy_initial_velocity;
 
 Vector2 adjust_scale(Vector2 prev_scale, Vector2 *player_velocity)
 {
+    const float X_SCALE_TRANSFORM = 3.0;
     player_velocity->x += ((floppy_initial_velocity.x / X_SCALE_TRANSFORM) - player_velocity->x) * 0.08;
     return (Vector2){
         .x = prev_scale.x + (X_SCALE_TRANSFORM - prev_scale.x) * 0.08,

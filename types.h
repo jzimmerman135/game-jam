@@ -5,7 +5,7 @@
 #include <termios.h>
 
 #define MAX_TUBES 100
-#define MAX_POWERUPS 32
+#define MAX_POWERUPS 5
 #define N_TEXTURES 5
 #define NLEVELS 2
 
@@ -67,7 +67,8 @@ typedef struct {
 } Powerup;
 
 typedef struct {
-    int nPowerups;
+    int active_powerup;
+    int n_powerups;
     Powerup powerup[MAX_POWERUPS];
 } Powerups;
 

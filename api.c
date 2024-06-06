@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "powerups.h"
-#include "jump.h"
 #include "types.h"
 #include "intro.h"
 
@@ -27,6 +26,7 @@
 #endif
 
 static void draw_win(game_state *gs);
+
 
 float clamp(float value, float min, float max)
 {
@@ -139,6 +139,20 @@ void init(game_state *gs)
     Intro intro;
     intro_setup(&intro);
 
+    Powerups powerups = {
+        .n_powerups = 1,
+        .active_powerup = 0,
+        .powerup = {0},
+    };
+
+    for (int i = 0; i < MAX_POWERUPS; i++) {
+        powerups.powerup[i].api_version_id = -1000;
+        powerups.powerup[i].color = powerup_palette[i % N_POWERUP_PALETTES];
+    }
+    powerups.powerup[0].api_version_id = 0;
+    powerups.powerup[0].color = BEIGE;
+
+
     *gs = (game_state){
         .screen = screen,
         .settings = settings,
@@ -147,7 +161,7 @@ void init(game_state *gs)
         .map = map,
         .delta = 0.0,
         .elapsed = gs->elapsed,
-        .powerups = (Powerups){0},
+        .powerups = powerups,
         .assets = assets,
         .intro = intro,
         .morpheus = morpheus,
@@ -207,7 +221,8 @@ void reset(game_state *game)
     game->floppy.position = floppy_initial_position;
     game->floppy.velocity = floppy_initial_velocity;
     game->camera = init_camera(game->floppy.position);
-    game->settings.api_version = game->last_checkpoint.api_version;
+    game->settings.api_version = 0;
+    game->powerups.active_powerup = 0;
     game->floppy.position = game->last_checkpoint.position;
 }
 
@@ -248,10 +263,12 @@ void UpdateGame(game_state *gs)
     update_morpheus(&gs->morpheus);
 
 
-    if (IsKeyPressed(KEY_K)) { // kill switch
-        settings->gameOver = true;
-        gs->last_checkpoint = initial_checkpoint;
-    }
+    // if (IsKeyPressed(KEY_K)) { // kill switch
+    //     settings->gameOver = true;
+    //     gs->last_checkpoint = initial_checkpoint;
+    // }
+
+    /* Are effective when pausing */
 
     if (settings->gameOver) {
         if (IsKeyPressed(KEY_ENTER))
@@ -266,9 +283,24 @@ void UpdateGame(game_state *gs)
         try_open_text_editor(&gs->settings, filename);
     }
 
+    gs->map.scale = adjust_scale(gs->map.scale, &gs->floppy.velocity);
+
     if (IsKeyPressed('C')) {
         gs->last_checkpoint.position = gs->floppy.position;
         gs->last_checkpoint.api_version = gs->settings.api_version;
+    }
+
+    if (IsKeyPressed('J')) {
+        gs->powerups.active_powerup = max(gs->powerups.active_powerup - 1, 0);
+        gs->settings.api_version = gs->powerups.powerup[gs->powerups.active_powerup].api_version_id;
+    } else if (IsKeyPressed('K')) {
+        gs->powerups.active_powerup = min(gs->powerups.active_powerup + 1, gs->powerups.n_powerups - 1);
+        gs->settings.api_version = gs->powerups.powerup[gs->powerups.active_powerup].api_version_id;
+    }
+
+    if (IsKeyPressed('F') && settings->api_changed) {
+        place_powerup(&gs->powerups, gs->floppy.position, ++settings->max_api_version);
+        gs->settings.api_changed = false;
     }
 
     if (IsKeyPressed('P'))
@@ -276,6 +308,8 @@ void UpdateGame(game_state *gs)
 
     if (settings->pause)
         return;
+
+    /* Rest are unaffected by pausing */
 
     bool start_secret_message =
         gs->morpheus.last_said == -1 &&
@@ -286,14 +320,6 @@ void UpdateGame(game_state *gs)
 
     if (start_secret_message) {
         gs->morpheus.statement_id = 0;
-    }
-
-    if (IsKeyPressed('D'))
-        gs->floppy.is_bulldozin = !gs->floppy.is_bulldozin;
-
-    if (IsKeyPressed('F') && settings->api_changed) {
-        place_powerup(&gs->powerups, gs->floppy.position, ++settings->max_api_version);
-        gs->settings.api_changed = false;
     }
 
     // Positive real velocity unintuitively goes downward, so we abstract this away to user
@@ -309,19 +335,19 @@ void UpdateGame(game_state *gs)
     update_camera(gs);
 
     // Check Pill Collisions
-    for (int i = 0; i < gs->powerups.nPowerups; i++) {
-        Powerup *powerup = &gs->powerups.powerup[i];
-        bool collided = CheckCollisionCircles(
-            gs->floppy.position, gs->floppy.radius, powerup->position, powerup_radius);
-        if (!collided)
-            continue;
-        if (!gs->floppy.is_bulldozin) {
-            gs->settings.api_version = powerup->api_version_id;
-        } else {
-            destroy_powerup(&gs->powerups, powerup->api_version_id);
-        }
-        break;
-    }
+    // for (int i = 0; i < gs->powerups.nPowerups; i++) {
+    //     Powerup *powerup = &gs->powerups.powerup[i];
+    //     bool collided = CheckCollisionCircles(
+    //         gs->floppy.position, gs->floppy.radius, powerup->position, powerup_radius);
+    //     if (!collided)
+    //         continue;
+    //     if (!gs->floppy.is_bulldozin) { // TODO: REMOVE IS BULLDOZIN EVERYWHERE
+    //         gs->settings.api_version = powerup->api_version_id;
+    //     } else {
+    //         destroy_powerup(&gs->powerups, powerup->api_version_id);
+    //     }
+    //     break;
+    // }
 
     // Check Tube Collisions
     for (int i = 0; i < gs->map.nTubes; i++) {
@@ -333,15 +359,6 @@ void UpdateGame(game_state *gs)
         }
     }
 
-    // warp space
-    if (IsKeyDown(KEY_RIGHT)) {
-        gs->map.scale.x += (3.0 - gs->map.scale.x) * 0.08;
-        gs->floppy.velocity.x += (floppy_initial_velocity.x / 3.0 - gs->floppy.velocity.x) * 0.08;
-    }
-    else {
-        gs->map.scale.x += (1.0 - gs->map.scale.x) * 0.05;
-        gs->floppy.velocity.x += (floppy_initial_velocity.x - gs->floppy.velocity.x) * 0.05;
-    }
 
 }
 
@@ -368,9 +385,8 @@ void DrawGame(game_state *gs)
     Vector2 origin = (Vector2){gs->floppy.position.x, gs->floppy.position.y};
     draw_map(&gs->map, origin);
 
-    for (int i = 0; i < gs->powerups.nPowerups; i++) {
-        draw_powerup(gs->powerups.powerup[i], gs->map.scale, gs->floppy.position);
-    }
+    // for (int i = 0; i < gs->powerups.nPowerups; i++)
+    //     draw_powerup(gs->powerups.powerup[i], gs->map.scale, gs->floppy.position);
 
     { // draw floppy
         DrawCircle(gs->floppy.position.x+4, gs->floppy.position.y+4, gs->floppy.radius*1.3, get_color(COLOR_TUBE_SHADOW));
@@ -384,11 +400,35 @@ void DrawGame(game_state *gs)
                 .position = Vector2Add(gs->floppy.position, (Vector2){24, 10}),
                 .color = RED,
             };
-            draw_powerup(p, (Vector2){1.0, 1.0}, gs->floppy.position);
+            draw_powerup(p.position, p.color, (Vector2){1.0, 1.0}, gs->floppy.position);
         }
     }
 
     EndMode2D();
+
+    if (gs->powerups.n_powerups > 1 || IsKeyDown('D')) {
+        Vector2 barpos = { gs->screen.x / 2., gs->screen.y - 40 };
+        Vector2 barwh = { 60 * 5.1, 50 };
+        Color c = ColorAlpha(DARKGRAY, 0.4);
+        DrawRectangleV(Vector2Subtract(barpos, Vector2Scale(barwh, 0.5)), barwh, c);
+        for (int i = 0; i < MAX_POWERUPS; i++) {
+            Vector2 pctr = { (i - 2) * 60.0 + barpos.x, barpos.y };
+            Vector2 rxy = { pctr.x - 25, pctr.y - 20 };
+            Vector2 rwh = { 50, 40 };
+
+            Powerup p = gs->powerups.powerup[i];
+
+            if (i == gs->powerups.active_powerup) {
+                DrawRectangleV(Vector2AddValue(rxy, -2), Vector2AddValue(rwh, 4), LIGHTGRAY);
+                DrawRectangleV(rxy, rwh, DARKGRAY);
+            } else {
+                DrawRectangleV(rxy, rwh, c);
+            }
+
+            if (i < gs->powerups.n_powerups)
+                draw_powerup(pctr, p.color, (Vector2){1, 1}, (Vector2){0, 0});
+        }
+    }
 
     draw_secret_message(&gs->morpheus, gs->elapsed);
 
@@ -412,10 +452,6 @@ void DrawGame(game_state *gs)
         DrawRectangleV(Vector2Add(xy2, offset), Vector2Add(wh, offset), BLACK);
         DrawRectangleV(xy2, wh, WHITE);
     }
-
-    // char strbuf[256];
-    // sprintf(strbuf, "floppyx: %g\n", gs->floppy.position.x);
-    // DrawText(strbuf, 0, gs->screen.y - 40.0, 40, BLACK);
 }
 
 bool step(game_state *state) {

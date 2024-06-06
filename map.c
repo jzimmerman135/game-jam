@@ -6,6 +6,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <stdlib.h>
+#include "api.h"
 
 static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
 {
@@ -100,8 +101,8 @@ Rectangle transform_rec(Rectangle tb_rec, Vector2 scale, Vector2 origin)
 {
     Vector2 tb_xy = (Vector2){ tb_rec.x, tb_rec.y };
     Vector2 tb_yz = (Vector2){ tb_rec.x + tb_rec.width, tb_rec.y + tb_rec.height };
-    tb_xy = scale_by(tb_xy, scale, origin);
-    tb_yz = scale_by(tb_yz, scale, origin);
+    tb_xy = apply_transform(tb_xy, scale, origin);
+    tb_yz = apply_transform(tb_yz, scale, origin);
     Vector2 tb_wh = Vector2Subtract(tb_yz, tb_xy);
     return (Rectangle){
         .x = tb_xy.x,

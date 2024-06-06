@@ -1,6 +1,7 @@
 #include "raylib.h"
+#include "raylib.h"
+#include "raymath.h"
 #include "api.h"
-#include "jump.h"
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
@@ -18,7 +19,7 @@
  * Change and recompile this code with 'make' to create a pill.
  * When you do you'll see it's ready for you to take.
  *
- * In the game hit 'n' to take the pill
+ * In the game hit 'F' to take the pill
  *
  * -------------------------------------------------------------------
  */
@@ -26,7 +27,7 @@
 void update_camera(game_state *gs)
 {
     gs->camera.target.x = gs->floppy.position.x;
-    // gs->camera.target.y = gs->floppy.position.y - gs->screen.y*0.5; 
+    // gs->camera.target.y = gs->floppy.position.y - gs->screen.y*0.5;
 }
 
  Vector2 update_floppy_velocity(Vector2 prev_velocity, float delta_time, bool did_jump)
@@ -34,19 +35,14 @@ void update_camera(game_state *gs)
     float gravity = -14.;
     float jump_boost = 800.0;
     float max_upward_velocity = 400.0;
-    float next_velocity_x = prev_velocity.x;
     Vector2 new_velocity;
 
-    /* gravity = 14.0; */
-    /* jump_boost = 8000.0; */
-    /* max_upward_velocity = 800.0; */
-    /* next_velocity_x = 0; */
-    // gravity = 14.0; 
-    // jump_boost = 8000.0; 
-    // max_upward_velocity = 800.0; 
-    // next_velocity_x = 0; 
+    // gravity = 14.0;
+    // jump_boost = 8000.0;
+    // max_upward_velocity = 800.0;
+    // prev_velocity.x = 0;
 
-    new_velocity.x = next_velocity_x;
+    new_velocity.x = prev_velocity.x;
     new_velocity.y = prev_velocity.y + gravity;
 
     if (IsKeyPressed(KEY_SPACE))
@@ -56,4 +52,25 @@ void update_camera(game_state *gs)
     new_velocity.y = min(new_velocity.y, max_upward_velocity);
 
     return new_velocity;
+}
+
+
+const float X_SCALE_TRANSFORM = 1.0;
+
+// Defined externally
+extern const Vector2 floppy_initial_velocity;
+
+Vector2 adjust_scale(Vector2 prev_scale, Vector2 *player_velocity)
+{
+    player_velocity->x += ((floppy_initial_velocity.x / X_SCALE_TRANSFORM) - player_velocity->x) * 0.08;
+    return (Vector2){
+        .x = prev_scale.x + (X_SCALE_TRANSFORM - prev_scale.x) * 0.08,
+        .y = prev_scale.y,
+    };
+}
+
+Vector2 apply_transform(Vector2 point, Vector2 scale, Vector2 playerpos)
+{
+    Vector2 movedpt = Vector2Subtract(point, playerpos);
+    return Vector2Add(Vector2Multiply(movedpt, scale), playerpos);
 }

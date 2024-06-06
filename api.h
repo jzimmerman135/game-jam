@@ -8,6 +8,11 @@
 #include "types.h"
 #include "powerups.h"
 
+/* USER FUNCTION HEADERS */
+Vector2 update_floppy_velocity(Vector2 prev_velocity, float delta_time, bool did_jump);
+Vector2 apply_transform(Vector2 pt, Vector2 scale, Vector2 origin);
+Vector2 adjust_scale(Vector2 prev_scale, Vector2 *player_velocity);
+
 #define GAME_STATE_SIZE 20
 
 typedef struct game_state game_state;

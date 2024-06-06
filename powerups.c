@@ -1,5 +1,5 @@
 #include "powerups.h"
-#include "map.h"
+#include "api.h"
 #include "raylib.h"
 #include "types.h"
 #include <math.h>
@@ -13,31 +13,26 @@
 const float powerup_radius = 10.0;
 
 const Color powerup_palette[] = {
+    SKYBLUE,
     PURPLE,
-    RED,
-    GREEN,
     BLUE,
-    ORANGE,
-    LIME,
+    GREEN,
+    MAGENTA,
 };
 
 const int N_POWERUP_PALETTES = sizeof(powerup_palette) / sizeof(Color);
 
 void place_powerup(Powerups *powerups, Vector2 pos, int id) {
-    if (powerups->nPowerups > MAX_POWERUPS) {
-        powerups->powerup[0] = powerups->powerup[--powerups->nPowerups];
-    }
-    powerups->powerup[powerups->nPowerups].position = pos;
-    powerups->powerup[powerups->nPowerups].api_version_id = id;
-    powerups->powerup[powerups->nPowerups].color = powerup_palette[id % N_POWERUP_PALETTES];
-    powerups->nPowerups++;
-}
-
-void destroy_powerup(Powerups *powerups, int id) {
-    for (int i = 0; i < powerups->nPowerups % MAX_POWERUPS; i++) {
-        if (powerups->powerup[i].api_version_id == id) {
-            powerups->powerup[i] = powerups->powerup[--powerups->nPowerups];
-        }
+    if (powerups->n_powerups == MAX_POWERUPS && powerups->active_powerup == 0) {
+        powerups->powerup[MAX_POWERUPS - 1].api_version_id = id;
+        powerups->powerup[MAX_POWERUPS - 1].color = powerup_palette[id % N_POWERUP_PALETTES];
+    } else if (powerups->n_powerups == MAX_POWERUPS) {
+        powerups->powerup[powerups->active_powerup].api_version_id = id;
+        powerups->powerup[powerups->active_powerup].color = powerup_palette[id % N_POWERUP_PALETTES];
+    } else {
+        powerups->powerup[powerups->n_powerups].api_version_id = id;
+        powerups->powerup[powerups->n_powerups].color = powerup_palette[id % N_POWERUP_PALETTES];
+        powerups->n_powerups++;
     }
 }
 
@@ -66,10 +61,10 @@ bool try_open_text_editor(Settings *settings, char *filename) {
     return true;
 }
 
-void draw_powerup(Powerup p, Vector2 mapscale, Vector2 origin)
+void draw_powerup(Vector2 pos, Color c, Vector2 mapscale, Vector2 origin)
 {
-    Vector2 pos = scale_by(p.position, mapscale, origin);
-    DrawEllipse(pos.x, pos.y, 20.0, powerup_radius, p.color);
+    pos = apply_transform(pos, mapscale, origin);
+    DrawEllipse(pos.x, pos.y, 20.0, powerup_radius, c);
     DrawEllipse(pos.x - 6, pos.y - 5, 20.0 / 4., powerup_radius / 4., ColorAlpha(WHITE, 0.5));
 }
 
@@ -173,9 +168,4 @@ void DrawTextureTiled(Texture2D texture, Rectangle source, Rectangle dest, Vecto
             }
         }
     }
-}
-
-Vector2 scale_by(Vector2 pt, Vector2 scale, Vector2 origin) {
-    Vector2 movedpt = Vector2Subtract(pt, origin);
-    return Vector2Add(Vector2Multiply(movedpt, scale), origin);
 }

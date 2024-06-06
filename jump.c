@@ -26,7 +26,6 @@
 void update_camera(game_state *gs)
 {
     gs->camera.target.x = gs->floppy.position.x;
-    //gs->camera.target.y = gs->floppy.position.y - (gs->screen.y * 0.5);
 }
 
  Vector2 update_floppy_velocity(Vector2 prev_velocity, float delta_time, bool did_jump)
@@ -37,11 +36,6 @@ void update_camera(game_state *gs)
     float next_velocity_x = prev_velocity.x;
     Vector2 new_velocity;
 
-    //gravity=14;
-    //jump_boost=2000;
-    //max_upward_velocity=800;
-    //next_velocity_x = 0;
-    
     new_velocity.x = next_velocity_x;
     new_velocity.y = prev_velocity.y + gravity;
 

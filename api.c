@@ -90,6 +90,7 @@ void init(game_state *gs)
         .radius = FLOPPY_RADIUS,
         .velocity = floppy_initial_velocity,
         .position = floppy_initial_position,
+        .is_bulldozin = false,
     };
 
     Camera2D camera = init_camera(floppy.position);
@@ -113,7 +114,8 @@ void init(game_state *gs)
         .powerups = (Powerups){0},
         .assets = assets,
         .intro = intro,
-        .morpheus = morpheus
+        .morpheus = morpheus,
+        .last_checkpoint = floppy_initial_position,
     };
 }
 
@@ -161,6 +163,7 @@ void reset(game_state *game)
     game->floppy.position = floppy_initial_position;
     game->floppy.velocity = floppy_initial_velocity;
     game->camera = init_camera(game->floppy.position);
+    game->floppy.position = game->last_checkpoint;
 }
 
 Vector2 flip_y(Vector2 v) {
@@ -195,7 +198,15 @@ void UpdateGame(game_state *gs)
         try_open_text_editor(&gs->settings, filename);
     }
 
-    if (IsKeyPressed('P')) settings->pause = !settings->pause;
+    if (IsKeyPressed('C')) {
+        gs->last_checkpoint = gs->floppy.position;
+        printf("saved checkpoint\n");
+    }
+
+
+    if (IsKeyPressed('P'))
+        settings->pause = !settings->pause;
+
     if (settings->pause)
         return;
 
@@ -204,8 +215,13 @@ void UpdateGame(game_state *gs)
         gs->morpheus.statement_id = 0;
     }
 
-    if (IsKeyPressed(KEY_K))
+    if (IsKeyPressed(KEY_K)) {
         settings->gameOver = true;
+        gs->last_checkpoint = floppy_initial_position;
+    }
+
+    if (IsKeyPressed('D'))
+        gs->floppy.is_bulldozin = !gs->floppy.is_bulldozin;
 
     if (IsKeyPressed('F') && settings->api_changed) {
         place_powerup(&gs->powerups, gs->floppy.position, ++settings->max_api_version);
@@ -260,13 +276,15 @@ void DrawGame(game_state *gs)
     DrawText(buf, 0, 0, 20, gs->settings.api_changed ? BLUE : RED);
 
     if (gs->settings.gameOver) {
-        DrawText("PRESS [ENTER] TO PLAY AGAIN",
-            gs->screen.x / 2.0 - (float)MeasureText("PRESS [ENTER] TO PLAY AGAIN", 40)/2,
-            gs->screen.y / 2.0 - 40, 40, RED);
-        return;
-    }
-
-    if (gs->settings.pause) {
+        float textlen = (float)MeasureText("PRESS [ENTER] TO PLAY AGAIN", 40);
+        float x = gs->screen.x / 2.0 - textlen / 2.0;
+        float y = gs->screen.y / 2.0 - 40;
+        DrawRectangle(x - 11, y - 11, textlen + 22, 40 + 22, BLACK);
+        DrawRectangle(x - 5, y - 5, textlen + 20, 40 + 20, get_color(COLOR_TUBE_SHADOW));
+        DrawRectangle(x - 10, y - 10, textlen + 20, 40 + 20, get_color(COLOR_AVATAR));
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", x, y, 40, get_color(COLOR_TUBE_SHADOW));
+        DrawText("PRESS [ENTER] TO PLAY AGAIN", x - 2, y - 2, 40, WHITE);
+    } else if (gs->settings.pause) {
         DrawText("GAME PAUSED",
                 gs->screen.x / 2.0 - (float)MeasureText("GAME PAUSED", 40)/2,
                 gs->screen.y / 2.0 - 40, 40, RED);

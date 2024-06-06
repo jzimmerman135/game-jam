@@ -22,6 +22,8 @@ struct game_state {
     Assets assets;
     Morpheus morpheus;
 
+    Vector2 last_checkpoint;
+
     float delta;
     float elapsed;
 

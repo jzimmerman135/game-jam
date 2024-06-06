@@ -32,6 +32,7 @@ typedef struct Floppy {
     Vector2 position;
     int radius;
     Color color;
+    bool is_bulldozin;
 } Floppy;
 
 typedef struct Tubes {

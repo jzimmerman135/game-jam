@@ -40,8 +40,26 @@ void open(void)
     }
 
     InitWindow(800, 600, "florpheus");
-    SetExitKey(0);
     SetTargetFPS(60);
+
+    while (!IsKeyPressed(KEY_SPACE)) {
+        BeginDrawing();
+
+        if (WindowShouldClose())
+            return;
+
+        ClearBackground(background_palette[0]);
+        float h = GetScreenHeight();
+        float w = GetScreenWidth();
+        Vector2 ctr = (Vector2){w * 0.25, h * 0.25};
+        DrawRectangleV(ctr, (Vector2){w * 0.5, h * 0.5}, get_color(COLOR_AVATAR));
+        DrawText("THE FLAPTRIX", ctr.x / 2. + 4, ctr.y + 4, 100, BLACK);
+        DrawText("THE FLAPTRIX", ctr.x / 2., ctr.y, 100, WHITE);
+        DrawText("Press SPACE to start", 10, ctr.y * 3.0, 20, WHITE);
+        EndDrawing();
+    }
+
+    SetExitKey(0);
 }
 
 void close(void)
@@ -125,6 +143,7 @@ void init(game_state *gs)
         .intro = intro,
         .morpheus = morpheus,
         .last_checkpoint = initial_checkpoint,
+        .n_deaths_total = 0,
     };
 }
 
@@ -160,6 +179,7 @@ void handle_tube_collision(game_state *gs, Tubes *tb)
 #ifndef GODMODE
             gs->settings.gameOver = true;
             gs->settings.pause = true;
+            gs->n_deaths_total++;
 #endif
             break;
         }
@@ -203,7 +223,7 @@ void UpdateGame(game_state *gs)
             return;
         } else {
             init_map(&gs->map, settings->level);
-            gs->last_checkpoint = (Checkpoint){.position = floppy_initial_position, .api_version = settings->api_version};
+            gs->last_checkpoint = (Checkpoint){.position = floppy_initial_position, .api_version = 0};
             reset(gs);
         }
     }
@@ -244,7 +264,7 @@ void UpdateGame(game_state *gs)
     if (settings->pause)
         return;
 
-    bool start_secret_message = gs->morpheus.last_said == -1 && gs->elapsed >= 10.0;
+    bool start_secret_message = gs->morpheus.last_said == -1 && gs->n_deaths_total > 1 && gs->elapsed >= 20.0;
     if (start_secret_message) {
         gs->morpheus.statement_id = 0;
     }

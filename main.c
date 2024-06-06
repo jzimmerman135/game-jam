@@ -7,6 +7,8 @@
 #include <string.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+#include <termios.h>
+#include <unistd.h>
 
 #define MADEIT() perror(stderr, "%s::%d made it\n", __FILE__, __LINE__)
 
@@ -109,6 +111,9 @@ void delete_files_with_prefix(const char *directory, const char *prefix) {
 int main(void) {
     api_manager api_manager = {0};
 
+    struct termios term;
+    tcgetattr(STDIN_FILENO, &term);
+
     delete_files_with_prefix(".", ".game_api_V");
 
     struct stat api_attr;
@@ -148,6 +153,8 @@ int main(void) {
     } while (api->step(game_state));
 
     api->close();
+
+    tcsetattr(STDIN_FILENO, TCSANOW, &term);
 
     clean_up_apis(&api_manager);
     free(game_state);

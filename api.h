@@ -24,6 +24,7 @@ struct game_state {
 
     Checkpoint last_checkpoint;
 
+    int n_deaths_total;
     float delta;
     float elapsed;
 

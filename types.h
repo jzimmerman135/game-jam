@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include "raylib.h"
+#include <termios.h>
 
 #define MAX_TUBES 100
 #define MAX_POWERUPS 32

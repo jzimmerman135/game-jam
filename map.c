@@ -7,7 +7,6 @@
 #include "raymath.h"
 #include <stdlib.h>
 
-static Vector2 scale_by(Vector2 pt, Vector2 scale, Vector2 origin);
 static void load_tube(const cJSON *data, Tubes *tb, float *xpos)
 {
     const cJSON *width, *height, *move, *ypos, *leftpad, *type;
@@ -157,7 +156,7 @@ static void draw_tube(Tubes *tb, Vector2 scale, Vector2 origin, int visibility)
 
             c[0] = get_color(COLOR_TUBE_WINNER1);
             c[1] = get_color(COLOR_TUBE_WINNER2);
-            
+
             color_phs += GetFrameTime()*2;
             color_phs = fmod(color_phs, 1.0);
 
@@ -185,9 +184,4 @@ void draw_map(Map *map, Vector2 origin) {
 
 src_file_id relevant_src_file_id_from_world_pos(const Map *map, Vector2 playerpos) {
     return FIRST_FILE;
-}
-
-static Vector2 scale_by(Vector2 pt, Vector2 scale, Vector2 origin) {
-    Vector2 movedpt = Vector2Subtract(pt, origin);
-    return Vector2Add(Vector2Multiply(movedpt, scale), origin);
 }

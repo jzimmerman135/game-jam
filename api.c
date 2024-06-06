@@ -186,17 +186,20 @@ void UpdateGame(game_state *gs)
         return;
     }
 
-    //if (gs->settings.win) {
-    //    gs->settings.win = false;
-    //    gs->settings.level++;
-    //    
-    //    if (gs->settings.level >= NLEVELS) {
-    //        gs->settings.level = NLEVELS;
-    //        gs->settings.win = true;
-    //        return;
-    //    } else {
-    //    }
-    //}
+    if (gs->settings.win) {
+        gs->settings.win = false;
+        gs->settings.level++;
+        
+        if (gs->settings.level >= NLEVELS) {
+            gs->settings.level = NLEVELS;
+            gs->settings.win = true;
+            return;
+        } else {
+            init_map(&gs->map, gs->settings.level);
+            gs->last_checkpoint = floppy_initial_position;
+            reset(gs);
+        }
+    }
 
     if (gs->settings.win) return;
 
@@ -290,10 +293,10 @@ void DrawGame(game_state *gs)
         return;
     }
 
-    if (gs->settings.win) {
-        draw_win(gs);
-        return;
-    }
+    //if (gs->settings.win) {
+    //    draw_win(gs);
+    //    return;
+    //}
 
     draw_background(gs->assets, gs->camera, gs->settings.api_version, gs->map.scale);
 

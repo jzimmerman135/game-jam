@@ -370,6 +370,57 @@ function lvl3()
     fp:close()
 end
 
+function lvl4()
+    local map = {
+        rects = {
+        }
+    }
+
+    squeeze = 0.9
+    local tubes = {
+        {upper_tube, screen_height*0.5, tube_width*1.7},
+        {lower_tube, screen_height*0.5, tube_width*3.0},
+
+        {upper_tube, screen_height*0.5, tube_width*1.7},
+        {lower_tube, screen_height*0.5, tube_width*3.0},
+
+        {upper_tube, screen_height*0.5, tube_width*1.7},
+        {lower_tube, screen_height*0.5, tube_width*3.0},
+
+        {upper_tube, screen_height*0.5, tube_width*3},
+        {upper_tube, screen_height*0.4, tube_width*3},
+        {lower_tube, screen_height*0.5, tube_width*3},
+        {lower_tube, screen_height*0.55, tube_width*3},
+    }
+
+    total_len = tube_width * (48 + 4)
+
+    local top_barrier = rect {
+        ypos = -screen_height_125*0.5,
+        --width = total_len - tube_width*3,
+        width = 4500,
+        height = screen_height_125,
+        move = 0,
+    }
+
+    local bottom_barrier = rect {
+        ypos = screen_height - screen_height_125*0.5,
+        width = total_len,
+        height = screen_height_125,
+        move = 0
+    }
+
+    add_rect(map, top_barrier)
+    add_rect(map, bottom_barrier)
+
+    tubestream(map, tubes, screen_width*0.5)
+
+    local fp = io.open("proto/maps/04.json", "w")
+    fp:write(json.encode(map))
+    fp:close()
+end
+
 lvl1()
 lvl2()
 lvl3()
+lvl4()
